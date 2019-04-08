@@ -31,7 +31,13 @@ class AddFeature(QtWidgets.QWidget):
         self.featureCreateButton = QtWidgets.QPushButton("Create Feature")
         self.featureDeleteButton = QtWidgets.QPushButton("Delete Feature")
 
-        self.featureChoices.addItem("Landscape")
+        self.featureChoices.addItem("Landscape", "ls")
+        self.featureChoices.addItem("Notable Place", "np")
+        self.featureChoices.addItem("Town", "t")
+        self.featureChoices.addItem("Dwelling", "dw")
+        self.featureChoices.addItem("Person", "p")
+        self.featureChoices.addItem("Monster", "m")
+        self.featureChoices.addItem("Item", "i")
 
         self.layout = QtWidgets.QHBoxLayout()
         # self.layout.addWidget(QtWidgets.QLabel("Feature Type"))
@@ -48,8 +54,8 @@ class CountryNotebook(QtWidgets.QWidget):
     def currSelection(self):
         return self.notebook.currentWidget()
 
-    def isUniq(self, text):
-        for clas in self.countries:
+    def isUniq(self, text, listToSrch):
+        for clas in listToSrch:
             if text == clas.uName:
                 return False
         return True
@@ -72,7 +78,31 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def createTreeWidget(self):
-        print("User wants to create a TreeWidget!")
+        a = self.featureCreateGroup.featureChoices.currentData()
+        text = self.featureCreateGroup.featureNameField.text()
+        b = self.currSelection()
+        if b == None:
+            return
+        if text.replace(" ", "") is "":
+            return
+        if self.isUniq(text, b.landscapes):
+            if a == "ls":
+                        c = Landscape(text)
+                        b.tree.addTopLevelItem(c)
+                        b.landscapes.append(c)
+                        print("created Landscape ",text)
+            elif a == "np":
+                pass
+            elif a == "t":
+                pass
+            elif a == "dw":
+                pass
+            elif a == "p":
+                pass
+            elif a == "m":
+                pass
+            elif a == "i":
+                pass
 
     def deleteTreeWidget(self):
         print("User wants to delete a TreeWidget!")
@@ -80,12 +110,12 @@ class CountryNotebook(QtWidgets.QWidget):
     @QtCore.Slot()
     def createTab(self):
         text = self.countryCreateGroup.countryNameField.text()
-        isTextUniq = self.isUniq(text.lower())
+        isTextUniq = self.isUniq(text, self.countries)
         if text.replace(" ", "") is "":
             return
         if isTextUniq == False:
             return
-        a = CountryTab(text.lower())
+        a = CountryTab(text)
         b = self.currSelection()
         self.notebook.addTab(a, text)
         self.countries.append(a)
@@ -138,6 +168,7 @@ class CountryTab(QtWidgets.QWidget):
 
         self.uName = name
         self.countryDetInfo = ""
+        self.landscapes = []
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
@@ -147,15 +178,22 @@ class CountryTab(QtWidgets.QWidget):
         self.layout.addWidget(self.tree)
         self.setLayout(self.layout)
 
-
-class Landscape(QtWidgets.QTreeWidgetItem):
-    def __init__(self, uName, Parent=None):
+class treeObject(QtWidgets.QTreeWidgetItem):
+    def __init__(self, Parent=None):
         super().__init__()
 
         self.uName = ""
         self.detInfo = ""
         self.children = []
 
+class Landscape(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.children = ["Notable Place", "Town"]
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Landscape")
 
 class BaseInfo(QtWidgets.QWidget):
     def __init__(self, parent=None):
