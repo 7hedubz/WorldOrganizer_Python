@@ -65,9 +65,10 @@ class CountryNotebook(QtWidgets.QWidget):
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
             print("New Selection :"+a.uName)
             try:
-                self.connect(self.a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+                self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+                print("Tree signal 'itemSelectionChanged' connected to ",a.uName,"'s tree")
             except AttributeError:
-                print("No tree items to select")
+                print("No tree to connect to")
         except AttributeError:
             print("Nothing to select")
 
@@ -98,15 +99,15 @@ class CountryNotebook(QtWidgets.QWidget):
                         b.tree.addTopLevelItem(c)
                         b.notablePlaces.append(c)
                         print("created Notable Place ",text)
-            elif a == "t":
+            if a == "t":
                 pass
-            elif a == "dw":
+            if a == "dw":
                 pass
-            elif a == "p":
+            if a == "p":
                 pass
-            elif a == "m":
+            if a == "m":
                 pass
-            elif a == "i":
+            if a == "i":
                 pass
 
     def deleteTreeWidget(self):
