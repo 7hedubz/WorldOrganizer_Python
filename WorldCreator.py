@@ -63,16 +63,17 @@ class CountryNotebook(QtWidgets.QWidget):
     @QtCore.Slot()
     def changeCountrySelection(self):
         a = self.currCountrySelection()
-        try:
+        if True:
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
-            for ea in self.countries:
-                self.disconnect(ea.tree)
-                print("Tree signal disconnected from previous owner")
 
             self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
-
             print("Tree signal connected to",a.uName+"'s tree")
-        except AttributeError:
+            for ea in self.countries:
+                ea.tree.blockSignal(True)
+                print("Tree signal disconnected from previous owner")
+            self.blockSignal(False)
+
+        else:
             print("Nothing to select")
 
     @QtCore.Slot()
