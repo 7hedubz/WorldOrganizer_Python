@@ -32,12 +32,6 @@ class AddFeature(QtWidgets.QWidget):
         self.featureDeleteButton = QtWidgets.QPushButton("Delete Feature")
 
         self.featureChoices.addItem("Landscape", "ls")
-        self.featureChoices.addItem("Notable Place", "np")
-        self.featureChoices.addItem("Town", "t")
-        self.featureChoices.addItem("Dwelling", "dw")
-        self.featureChoices.addItem("Person", "p")
-        self.featureChoices.addItem("Monster", "m")
-        self.featureChoices.addItem("Item", "i")
 
         self.layout = QtWidgets.QHBoxLayout()
         # self.layout.addWidget(QtWidgets.QLabel("Feature Type"))
@@ -61,11 +55,19 @@ class CountryNotebook(QtWidgets.QWidget):
         return True
 
     @QtCore.Slot()
+    def treeSelectionChanged(self):
+        print("Tree selection changed")
+
+    @QtCore.Slot()
     def changeSelection(self):
         a = self.currSelection()
         try:
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
             print("New Selection :"+a.uName)
+            try:
+                self.connect(self.a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+            except AttributeError:
+                print("No tree items to select")
         except AttributeError:
             print("Nothing to select")
 
@@ -92,7 +94,10 @@ class CountryNotebook(QtWidgets.QWidget):
                         b.landscapes.append(c)
                         print("created Landscape ",text)
             elif a == "np":
-                pass
+                        c = Landscape(text)
+                        b.tree.addTopLevelItem(c)
+                        b.notablePlaces.append(c)
+                        print("created Notable Place ",text)
             elif a == "t":
                 pass
             elif a == "dw":
@@ -163,12 +168,18 @@ class CountryNotebook(QtWidgets.QWidget):
         self.connect(self.countryDetInfoField, QtCore.SIGNAL("textChanged()"), self.saveDetInfo)
 
 class CountryTab(QtWidgets.QWidget):
+
+    @QtCore.Slot()
+    def treeSelectionChanged(self):
+        a = self.tree.currentItem()
+
     def __init__(self, name, parent=None):
         super().__init__()
 
         self.uName = name
         self.countryDetInfo = ""
         self.landscapes = []
+
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
@@ -177,6 +188,8 @@ class CountryTab(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.layout.addWidget(self.tree)
         self.setLayout(self.layout)
+
+
 
 class treeObject(QtWidgets.QTreeWidgetItem):
     def __init__(self, Parent=None):
@@ -190,16 +203,13 @@ class Landscape(treeObject):
     def __init__(self, name, Parent=None):
         super().__init__()
 
-        self.children = ["Notable Place", "Town"]
+        self.possilbeChildren = [["Notable Place", "np"], ["Town", "t"]]
+        self.children = []
         self.uName = name
         self.setText(0, name)
         self.setText(1, "Landscape")
 
-class BaseInfo(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super().__init__()
-
-class BuildingInfo(BaseInfo):
+class BuildingInfo(treeObject):
     def __init__(self, parent=None):
         super().__init__()
 
