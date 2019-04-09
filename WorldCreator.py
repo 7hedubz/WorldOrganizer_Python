@@ -45,7 +45,7 @@ class AddFeature(QtWidgets.QWidget):
 
 class CountryNotebook(QtWidgets.QWidget):
 
-    def currSelection(self):
+    def currCountrySelection(self):
         return self.notebook.currentWidget()
 
     def isUniq(self, text, listToSrch):
@@ -57,24 +57,27 @@ class CountryNotebook(QtWidgets.QWidget):
     @QtCore.Slot()
     def treeSelectionChanged(self):
         print("Tree selection changed")
+        a = self.currCountrySelection()
+        b = a.tree.currentItem()
 
     @QtCore.Slot()
-    def changeSelection(self):
-        a = self.currSelection()
+    def changeCountrySelection(self):
+        a = self.currCountrySelection()
         try:
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
-            print("New Selection :"+a.uName)
-            try:
-                self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
-                print("Tree signal 'itemSelectionChanged' connected to ",a.uName,"'s tree")
-            except AttributeError:
-                print("No tree to connect to")
+            for ea in self.countries:
+                self.disconnect(ea.tree)
+                print("Tree signal disconnected from previous owner")
+
+            self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+
+            print("Tree signal connected to",a.uName+"'s tree")
         except AttributeError:
             print("Nothing to select")
 
     @QtCore.Slot()
     def saveDetInfo(self):
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             return
         a.countryDetInfo = self.countryDetInfoField.toPlainText()
@@ -83,7 +86,7 @@ class CountryNotebook(QtWidgets.QWidget):
     def createTreeWidget(self):
         a = self.featureCreateGroup.featureChoices.currentData()
         text = self.featureCreateGroup.featureNameField.text()
-        b = self.currSelection()
+        b = self.currCountrySelection()
         if b == None:
             return
         if text.replace(" ", "") is "":
@@ -122,7 +125,7 @@ class CountryNotebook(QtWidgets.QWidget):
         if isTextUniq == False:
             return
         a = CountryTab(text)
-        b = self.currSelection()
+        b = self.currCountrySelection()
         self.notebook.addTab(a, text)
         self.countries.append(a)
         if b == None:
@@ -130,13 +133,13 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def deleteTab(self):
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             return
         b = self.countries.index(a)
         self.notebook.removeTab(b)
         del self.countries[b]
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             self.countryDetInfoField.setReadOnly(True)
             self.countryDetInfoField.clear()
@@ -165,7 +168,7 @@ class CountryNotebook(QtWidgets.QWidget):
         self.connect(self.countryCreateGroup.countryDeleteButton, QtCore.SIGNAL("released()"), self.deleteTab)
         self.connect(self.featureCreateGroup.featureCreateButton, QtCore.SIGNAL("released()"), self.createTreeWidget)
         self.connect(self.featureCreateGroup.featureDeleteButton, QtCore.SIGNAL("released()"), self.deleteTreeWidget)
-        self.connect(self.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeSelection)
+        self.connect(self.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeCountrySelection)
         self.connect(self.countryDetInfoField, QtCore.SIGNAL("textChanged()"), self.saveDetInfo)
 
 class CountryTab(QtWidgets.QWidget):
@@ -189,8 +192,6 @@ class CountryTab(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.layout.addWidget(self.tree)
         self.setLayout(self.layout)
-
-
 
 class treeObject(QtWidgets.QTreeWidgetItem):
     def __init__(self, Parent=None):
@@ -227,7 +228,6 @@ class MyWidget(QtWidgets.QWidget):
         self.parentGridLayout.addLayout(self.middleLayout, 0,0)
         self.setLayout(self.parentGridLayout)
 
-        # self.connect(self.notebook.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeSelection)
 
 
 app = QtWidgets.QApplication(sys.argv)
