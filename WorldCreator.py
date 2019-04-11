@@ -56,28 +56,23 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
+        print("Tree selection changed")
         a = self.currCountrySelection()
         b = a.tree.currentItem()
-        print("Tree selection changed to "+str(b))
 
     @QtCore.Slot()
     def changeCountrySelection(self):
         a = self.currCountrySelection()
-        if True:
-            print(self.countries)
-
-            for ea in self.countries:
-                try:
-                    z = ea.tree.currentItem()
-                    z.setSelected(False)
-                    print("set Selection in class "+str(ea))
-                except:
-                    print("No items selected in class "+str(ea))
-
+        try:
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
+            for ea in self.countries:
+                self.disconnect(ea.tree)
+                print("Tree signal disconnected from previous owner")
+
             self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+
             print("Tree signal connected to",a.uName+"'s tree")
-        else:
+        except AttributeError:
             print("Nothing to select")
 
     @QtCore.Slot()
@@ -130,13 +125,11 @@ class CountryNotebook(QtWidgets.QWidget):
         if isTextUniq == False:
             return
         a = CountryTab(text)
-        self.countries.append(a)
         b = self.currCountrySelection()
         self.notebook.addTab(a, text)
-
+        self.countries.append(a)
         if b == None:
             self.countryDetInfoField.setReadOnly(False)
-            self.currCountrySelection()
 
     @QtCore.Slot()
     def deleteTab(self):
@@ -181,7 +174,7 @@ class CountryNotebook(QtWidgets.QWidget):
 class CountryTab(QtWidgets.QWidget):
 
     @QtCore.Slot()
-    def treeSelection(self):
+    def treeSelectionChanged(self):
         a = self.tree.currentItem()
 
     def __init__(self, name, parent=None):
