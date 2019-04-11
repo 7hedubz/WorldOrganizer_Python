@@ -45,7 +45,7 @@ class AddFeature(QtWidgets.QWidget):
 
 class CountryNotebook(QtWidgets.QWidget):
 
-    def currSelection(self):
+    def currCountrySelection(self):
         return self.notebook.currentWidget()
 
     def isUniq(self, text, listToSrch):
@@ -56,25 +56,33 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
-        print("Tree selection changed")
+        a = self.currCountrySelection()
+        b = a.tree.currentItem()
+        print("Tree selection changed to "+str(b))
 
     @QtCore.Slot()
-    def changeSelection(self):
-        a = self.currSelection()
-        try:
+    def changeCountrySelection(self):
+        a = self.currCountrySelection()
+        if True:
+            print(self.countries)
+
+            for ea in self.countries:
+                try:
+                    z = ea.tree.currentItem()
+                    z.setSelected(False)
+                    print("set Selection in class "+str(ea))
+                except:
+                    print("No items selected in class "+str(ea))
+
             self.countryDetInfoField.setPlainText(a.countryDetInfo)
-            print("New Selection :"+a.uName)
-            try:
-                self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
-                print("Tree signal 'itemSelectionChanged' connected to ",a.uName,"'s tree")
-            except AttributeError:
-                print("No tree to connect to")
-        except AttributeError:
+            self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
+            print("Tree signal connected to",a.uName+"'s tree")
+        else:
             print("Nothing to select")
 
     @QtCore.Slot()
     def saveDetInfo(self):
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             return
         a.countryDetInfo = self.countryDetInfoField.toPlainText()
@@ -83,7 +91,7 @@ class CountryNotebook(QtWidgets.QWidget):
     def createTreeWidget(self):
         a = self.featureCreateGroup.featureChoices.currentData()
         text = self.featureCreateGroup.featureNameField.text()
-        b = self.currSelection()
+        b = self.currCountrySelection()
         if b == None:
             return
         if text.replace(" ", "") is "":
@@ -122,21 +130,23 @@ class CountryNotebook(QtWidgets.QWidget):
         if isTextUniq == False:
             return
         a = CountryTab(text)
-        b = self.currSelection()
-        self.notebook.addTab(a, text)
         self.countries.append(a)
+        b = self.currCountrySelection()
+        self.notebook.addTab(a, text)
+
         if b == None:
             self.countryDetInfoField.setReadOnly(False)
+            self.currCountrySelection()
 
     @QtCore.Slot()
     def deleteTab(self):
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             return
         b = self.countries.index(a)
         self.notebook.removeTab(b)
         del self.countries[b]
-        a = self.currSelection()
+        a = self.currCountrySelection()
         if a == None:
             self.countryDetInfoField.setReadOnly(True)
             self.countryDetInfoField.clear()
@@ -165,13 +175,13 @@ class CountryNotebook(QtWidgets.QWidget):
         self.connect(self.countryCreateGroup.countryDeleteButton, QtCore.SIGNAL("released()"), self.deleteTab)
         self.connect(self.featureCreateGroup.featureCreateButton, QtCore.SIGNAL("released()"), self.createTreeWidget)
         self.connect(self.featureCreateGroup.featureDeleteButton, QtCore.SIGNAL("released()"), self.deleteTreeWidget)
-        self.connect(self.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeSelection)
+        self.connect(self.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeCountrySelection)
         self.connect(self.countryDetInfoField, QtCore.SIGNAL("textChanged()"), self.saveDetInfo)
 
 class CountryTab(QtWidgets.QWidget):
 
     @QtCore.Slot()
-    def treeSelectionChanged(self):
+    def treeSelection(self):
         a = self.tree.currentItem()
 
     def __init__(self, name, parent=None):
@@ -189,8 +199,6 @@ class CountryTab(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.layout.addWidget(self.tree)
         self.setLayout(self.layout)
-
-
 
 class treeObject(QtWidgets.QTreeWidgetItem):
     def __init__(self, Parent=None):
@@ -227,7 +235,6 @@ class MyWidget(QtWidgets.QWidget):
         self.parentGridLayout.addLayout(self.middleLayout, 0,0)
         self.setLayout(self.parentGridLayout)
 
-        # self.connect(self.notebook.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeSelection)
 
 
 app = QtWidgets.QApplication(sys.argv)
