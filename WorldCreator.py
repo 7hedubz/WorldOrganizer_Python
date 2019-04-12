@@ -56,24 +56,23 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
-        print("Tree selection changed")
         a = self.currCountrySelection()
         b = a.tree.currentItem()
+        print("Tree selection changed in tab "+self.currCountrySelection().uName)
 
     @QtCore.Slot()
     def changeCountrySelection(self):
-        a = self.currCountrySelection()
+        b = self.currentTab
+        self.currentTab = self.currCountrySelection()
+        self.countryDetInfoField.setPlainText(self.currentTab.countryDetInfo)
         try:
-            self.countryDetInfoField.setPlainText(a.countryDetInfo)
-            for ea in self.countries:
-                self.disconnect(ea.tree)
-                print("Tree signal disconnected from previous owner")
+            b.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
+            print("Tree signal disconnected from previous owner")
+        except:
+            pass
+        self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
 
-            self.connect(a.tree, QtCore.SIGNAL("itemSelectionChanged()"), self.treeSelectionChanged)
-
-            print("Tree signal connected to",a.uName+"'s tree")
-        except AttributeError:
-            print("Nothing to select")
+        print("Tree signal connected to",self.currentTab.uName+"'s tree")
 
     @QtCore.Slot()
     def saveDetInfo(self):
@@ -148,10 +147,12 @@ class CountryNotebook(QtWidgets.QWidget):
         super().__init__()
 
         self.countries = []
+        self.currentTab = "" #Placeholder for future tab classes.
         self.notebook = QtWidgets.QTabWidget()
         self.countryDetInfoField = QtWidgets.QPlainTextEdit()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
+
 
         self.layout = QtWidgets.QVBoxLayout()
 
@@ -183,7 +184,6 @@ class CountryTab(QtWidgets.QWidget):
         self.uName = name
         self.countryDetInfo = ""
         self.landscapes = []
-
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
