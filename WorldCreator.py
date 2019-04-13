@@ -60,16 +60,18 @@ class CountryNotebook(QtWidgets.QWidget):
         currItem = currCountry.tree.currentItem()
         currCountry.detInfoField.setPlainText(currItem.detInfo)
         print("Tree selection changed in tab "+currCountry.uName+" to: "+str(currItem))
+        if currItem:
+            currCountry.detInfoField.setReadOnly(False)
 
     @QtCore.Slot()
     def changeCountrySelection(self):
         try:
-            b = self.currentTab
+            oldSelection = self.currentTab
             self.currentTab = self.currCountrySelection()
             self.countryDetInfoField.setPlainText(self.currentTab.countryDetInfo)
             try:
-                b.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
-                print("Tree signal disconnected from previous owner")
+                oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
+                print("Tree signal disconnected from previous owner: "+str(oldSelection.uName))
             except:
                 pass
             self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
@@ -80,10 +82,10 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def saveDetInfo(self):
-        a = self.currCountrySelection()
-        if a == None:
+        currCountry = self.currCountrySelection()
+        if currCountry == None:
             return
-        a.countryDetInfo = self.countryDetInfoField.toPlainText()
+        currCountry.countryDetInfo = self.countryDetInfoField.toPlainText()
 
     @QtCore.Slot()
     def createTreeWidget(self):
@@ -119,28 +121,26 @@ class CountryNotebook(QtWidgets.QWidget):
     @QtCore.Slot()
     def createTab(self):
         text = self.countryCreateGroup.countryNameField.text()
-        isTextUniq = self.isUniq(text, self.countries)
         if text.replace(" ", "") is "":
             return
-        if isTextUniq == False:
-            return
-        a = CountryTab(text)
-        b = self.currCountrySelection()
-        self.notebook.addTab(a, text)
-        self.countries.append(a)
-        if b == None:
-            self.countryDetInfoField.setReadOnly(False)
+        if self.isUniq(text, self.countries):
+            a = CountryTab(text)
+            currCountry = self.currCountrySelection()
+            self.notebook.addTab(a, text)
+            self.countries.append(a)
+            if currCountry == None:
+                self.countryDetInfoField.setReadOnly(False)
 
     @QtCore.Slot()
     def deleteTab(self):
-        a = self.currCountrySelection()
-        if a == None:
+        currCountry = self.currCountrySelection()
+        if currCountry == None:
             return
-        b = self.countries.index(a)
-        self.notebook.removeTab(b)
-        del self.countries[b]
-        a = self.currCountrySelection()
-        if a == None:
+        currCountryIndex = self.countries.index(currCountry)
+        self.notebook.removeTab(currCountryIndex)
+        del self.countries[currCountryIndex]
+        currCountry = self.currCountrySelection()
+        if currCountry == None:
             self.countryDetInfoField.setReadOnly(True)
             self.countryDetInfoField.clear()
 
@@ -177,7 +177,15 @@ class CountryTab(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
-        a = self.tree.currentItem()
+        currItem = self.tree.currentItem()
+        self.detInfoField.setPlainText(currItem.detInfo)
+
+    @QtCore.Slot()
+    def saveDetInfo(self):
+        currItem = self.tree.currentItem()
+        print(currItem.uName)
+        currItem.detInfo = self.detInfoField.toPlainText()
+
 
     def __init__(self, name, parent=None):
         super().__init__()
@@ -194,7 +202,10 @@ class CountryTab(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.layout.addWidget(self.tree)
         self.layout.addWidget(self.detInfoField)
+        self.detInfoField.setReadOnly(True)
         self.setLayout(self.layout)
+
+        self.detInfoField.textChanged.connect(self.saveDetInfo)
 
 class treeObject(QtWidgets.QTreeWidgetItem):
     def __init__(self, Parent=None):
@@ -203,13 +214,13 @@ class treeObject(QtWidgets.QTreeWidgetItem):
         self.uName = ""
         self.detInfo = ""
         self.children = []
+        self.possibleChildren = []
 
 class Landscape(treeObject):
     def __init__(self, name, Parent=None):
         super().__init__()
 
         self.possibleChildren = [["Notable Place", "np"], ["Town", "t"]]
-        self.children = []
         self.uName = name
         self.setText(0, name)
         self.setText(1, "Landscape")
