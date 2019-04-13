@@ -56,23 +56,27 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
-        a = self.currCountrySelection()
-        b = a.tree.currentItem()
-        print("Tree selection changed in tab "+self.currCountrySelection().uName)
+        currCountry = self.currCountrySelection()
+        currItem = currCountry.tree.currentItem()
+        currCountry.detInfoField.setPlainText(currItem.detInfo)
+        print("Tree selection changed in tab "+currCountry.uName+" to: "+str(currItem))
 
     @QtCore.Slot()
     def changeCountrySelection(self):
-        b = self.currentTab
-        self.currentTab = self.currCountrySelection()
-        self.countryDetInfoField.setPlainText(self.currentTab.countryDetInfo)
         try:
-            b.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
-            print("Tree signal disconnected from previous owner")
+            b = self.currentTab
+            self.currentTab = self.currCountrySelection()
+            self.countryDetInfoField.setPlainText(self.currentTab.countryDetInfo)
+            try:
+                b.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
+                print("Tree signal disconnected from previous owner")
+            except:
+                pass
+            self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
+
+            print("Tree signal connected to",self.currentTab.uName+"'s tree")
         except:
             pass
-        self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
-
-        print("Tree signal connected to",self.currentTab.uName+"'s tree")
 
     @QtCore.Slot()
     def saveDetInfo(self):
@@ -83,34 +87,31 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def createTreeWidget(self):
-        a = self.featureCreateGroup.featureChoices.currentData()
-        text = self.featureCreateGroup.featureNameField.text()
-        b = self.currCountrySelection()
-        if b == None:
-            return
+        choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
+        text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
+        currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
+        if currCountry == None:
+            return #If there's no country break out! We can't make a feature with no home!
         if text.replace(" ", "") is "":
-            return
-        if self.isUniq(text, b.landscapes):
-            if a == "ls":
-                        c = Landscape(text)
-                        b.tree.addTopLevelItem(c)
-                        b.landscapes.append(c)
-                        print("created Landscape ",text)
-            elif a == "np":
-                        c = Landscape(text)
-                        b.tree.addTopLevelItem(c)
-                        b.notablePlaces.append(c)
-                        print("created Notable Place ",text)
-            if a == "t":
-                pass
-            if a == "dw":
-                pass
-            if a == "p":
-                pass
-            if a == "m":
-                pass
-            if a == "i":
-                pass
+            return #The only thing in the name is spaces, NO FEATURE FOR YOU
+        if choiceStr == "ls": #Make a landscape
+            if self.isUniq(text, currCountry.landscapes):
+                c = Landscape(text)
+                currCountry.tree.addTopLevelItem(c)
+                currCountry.landscapes.append(c)
+                print("created Landscape ",text)
+        elif choiceStr == "np":
+                print("created Notable Place ",text)
+        if choiceStr == "t":
+            pass
+        if choiceStr == "dw":
+            pass
+        if choiceStr == "p":
+            pass
+        if choiceStr == "m":
+            pass
+        if choiceStr == "i":
+            pass
 
     def deleteTreeWidget(self):
         print("User wants to delete a TreeWidget!")
@@ -165,12 +166,12 @@ class CountryNotebook(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
-        self.connect(self.countryCreateGroup.countryCreateButton, QtCore.SIGNAL("released()"), self.createTab)
-        self.connect(self.countryCreateGroup.countryDeleteButton, QtCore.SIGNAL("released()"), self.deleteTab)
-        self.connect(self.featureCreateGroup.featureCreateButton, QtCore.SIGNAL("released()"), self.createTreeWidget)
-        self.connect(self.featureCreateGroup.featureDeleteButton, QtCore.SIGNAL("released()"), self.deleteTreeWidget)
-        self.connect(self.notebook, QtCore.SIGNAL("currentChanged(int)"), self.changeCountrySelection)
-        self.connect(self.countryDetInfoField, QtCore.SIGNAL("textChanged()"), self.saveDetInfo)
+        self.countryCreateGroup.countryCreateButton.released.connect(self.createTab)
+        self.countryCreateGroup.countryDeleteButton.released.connect(self.deleteTab)
+        self.featureCreateGroup.featureCreateButton.released.connect(self.createTreeWidget)
+        self.featureCreateGroup.featureDeleteButton.released.connect(self.deleteTreeWidget)
+        self.notebook.currentChanged.connect(self.changeCountrySelection)
+        self.countryDetInfoField.textChanged.connect(self.saveDetInfo)
 
 class CountryTab(QtWidgets.QWidget):
 
@@ -188,9 +189,11 @@ class CountryTab(QtWidgets.QWidget):
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Name","Type"])
+        self.detInfoField = QtWidgets.QPlainTextEdit()
 
         self.layout = QtWidgets.QHBoxLayout()
         self.layout.addWidget(self.tree)
+        self.layout.addWidget(self.detInfoField)
         self.setLayout(self.layout)
 
 class treeObject(QtWidgets.QTreeWidgetItem):
@@ -205,13 +208,13 @@ class Landscape(treeObject):
     def __init__(self, name, Parent=None):
         super().__init__()
 
-        self.possilbeChildren = [["Notable Place", "np"], ["Town", "t"]]
+        self.possibleChildren = [["Notable Place", "np"], ["Town", "t"]]
         self.children = []
         self.uName = name
         self.setText(0, name)
         self.setText(1, "Landscape")
 
-class BuildingInfo(treeObject):
+class NotablePlace(treeObject):
     def __init__(self, parent=None):
         super().__init__()
 
