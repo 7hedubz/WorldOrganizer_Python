@@ -56,12 +56,22 @@ class CountryNotebook(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
-        currCountry = self.currCountrySelection()
-        currItem = currCountry.tree.currentItem()
-        currCountry.detInfoField.setPlainText(currItem.detInfo)
-        print("Tree selection changed in tab "+currCountry.uName+" to: "+str(currItem))
-        if currItem:
-            currCountry.detInfoField.setReadOnly(False)
+        try:
+            currCountry = self.currCountrySelection()
+            currItem = currCountry.tree.currentItem()
+            currCountry.detInfoField.setPlainText(currItem.detInfo)
+            print("Tree selection changed in tab "+currCountry.uName+" to: "+str(currItem))
+            if currItem:
+                currCountry.detInfoField.setReadOnly(False)
+            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.featureCreateGroup.featureChoices.removeItem(1)
+            for ea in currItem.possibleChildren:
+                self.featureCreateGroup.featureChoices.addItem(ea[0], ea[1])
+        except:
+            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.featureCreateGroup.featureChoices.removeItem(1)
 
     @QtCore.Slot()
     def changeCountrySelection(self):
@@ -92,6 +102,7 @@ class CountryNotebook(QtWidgets.QWidget):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
         text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
         currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
         if currCountry == None:
             return #If there's no country break out! We can't make a feature with no home!
         if text.replace(" ", "") is "":
@@ -102,21 +113,48 @@ class CountryNotebook(QtWidgets.QWidget):
                 currCountry.tree.addTopLevelItem(c)
                 currCountry.landscapes.append(c)
                 print("created Landscape ",text)
-        elif choiceStr == "np":
-                print("created Notable Place ",text)
+        if choiceStr == "np":
+            if self.isUniq(text, currItem.children):
+                c = NotablePlace(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created NP ",text)
         if choiceStr == "t":
-            pass
+            if self.isUniq(text, currItem.children):
+                c = Town(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created Town ",text)
         if choiceStr == "dw":
-            pass
+            if self.isUniq(text, currItem.children):
+                c = Dwelling(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created Dwelling ",text)
         if choiceStr == "p":
-            pass
+            if self.isUniq(text, currItem.children):
+                c = Person(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created Peron ",text)
         if choiceStr == "m":
-            pass
+            if self.isUniq(text, currItem.children):
+                c = Monster(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created Monster ",text)
         if choiceStr == "i":
-            pass
+            if self.isUniq(text, currItem.children):
+                c = Item(text)
+                currItem.addChild(c)
+                currItem.children.append(c)
+                print("created Item ",text)
 
-    def deleteTreeWidget(self):
-        print("User wants to delete a TreeWidget!")
+    def deleteTreeWidget(self): #Will need to call treeSelectionChanged() in here like in deleteTab()
+        currCountry = self.currCountrySelection()
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
+        root = currCountry.tree.invisibleRootItem()
+        (currItem.parent() or root).removeChild(currItem)
 
     @QtCore.Slot()
     def createTab(self):
@@ -143,6 +181,7 @@ class CountryNotebook(QtWidgets.QWidget):
         if currCountry == None:
             self.countryDetInfoField.setReadOnly(True)
             self.countryDetInfoField.clear()
+        self.treeSelectionChanged()
 
     def __init__(self, parent=None):
         super().__init__()
@@ -176,16 +215,9 @@ class CountryNotebook(QtWidgets.QWidget):
 class CountryTab(QtWidgets.QWidget):
 
     @QtCore.Slot()
-    def treeSelectionChanged(self):
-        currItem = self.tree.currentItem()
-        self.detInfoField.setPlainText(currItem.detInfo)
-
-    @QtCore.Slot()
     def saveDetInfo(self):
         currItem = self.tree.currentItem()
-        print(currItem.uName)
         currItem.detInfo = self.detInfoField.toPlainText()
-
 
     def __init__(self, name, parent=None):
         super().__init__()
@@ -226,8 +258,56 @@ class Landscape(treeObject):
         self.setText(1, "Landscape")
 
 class NotablePlace(treeObject):
-    def __init__(self, parent=None):
+    def __init__(self, name, Parent=None):
         super().__init__()
+
+        self.possibleChildren = [["Person", "p"], ["Monster", "m"], ["Item", "i"]]
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Notable Place")
+
+class Town(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.possibleChildren = [["Dwelling", "dw"], ["Notable Place", "np"]]
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Town")
+
+class Dwelling(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.possibleChildren = [["Person", "p"], ["Monster", "m"], ["Item", "i"]]
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Dwelling")
+
+class Person(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Person")
+
+class Monster(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Monster")
+
+class Item(treeObject):
+    def __init__(self, name, Parent=None):
+        super().__init__()
+
+        self.uName = name
+        self.setText(0, name)
+        self.setText(1, "Item")
+
 
 class MyWidget(QtWidgets.QWidget):
 
