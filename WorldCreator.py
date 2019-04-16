@@ -49,9 +49,10 @@ class CountryNotebook(QtWidgets.QWidget):
         return self.notebook.currentWidget()
 
     def isUniq(self, text, listToSrch):
-        for clas in listToSrch:
-            if text == clas.uName:
-                return False
+        for ea in listToSrch:
+            if isinstance(ea, type(Landscape(""))):
+                if text == ea.uName:
+                    return False
         return True
 
     @QtCore.Slot()
@@ -60,7 +61,8 @@ class CountryNotebook(QtWidgets.QWidget):
             currCountry = self.currCountrySelection()
             currItem = currCountry.tree.currentItem()
             currCountry.detInfoField.setPlainText(currItem.detInfo)
-            print("Tree selection changed in tab "+currCountry.uName+" to: "+str(currItem))
+            self.treeDetInfoField.setPlainText(currItem.detInfoT)
+
             if currItem:
                 currCountry.detInfoField.setReadOnly(False)
             self.featureCreateGroup.featureChoices.removeItem(1)
@@ -78,24 +80,21 @@ class CountryNotebook(QtWidgets.QWidget):
         try:
             oldSelection = self.currentTab
             self.currentTab = self.currCountrySelection()
-            self.countryDetInfoField.setPlainText(self.currentTab.countryDetInfo)
             try:
                 oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
-                print("Tree signal disconnected from previous owner: "+str(oldSelection.uName))
             except:
                 pass
             self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
-
-            print("Tree signal connected to",self.currentTab.uName+"'s tree")
         except:
             pass
 
     @QtCore.Slot()
     def saveDetInfo(self):
         currCountry = self.currCountrySelection()
-        if currCountry == None:
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
+        if currCountry is None:
             return
-        currCountry.countryDetInfo = self.countryDetInfoField.toPlainText()
+        currItem.detInfoT = self.treeDetInfoField.toPlainText()
 
     @QtCore.Slot()
     def createTreeWidget(self):
@@ -103,7 +102,7 @@ class CountryNotebook(QtWidgets.QWidget):
         text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
         currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
-        if currCountry == None:
+        if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
         if text.replace(" ", "") is "":
             return #The only thing in the name is spaces, NO FEATURE FOR YOU
@@ -111,50 +110,60 @@ class CountryNotebook(QtWidgets.QWidget):
             if self.isUniq(text, currCountry.landscapes):
                 c = Landscape(text)
                 currCountry.tree.addTopLevelItem(c)
+                currCountry.landscapesHelper.append(text)
                 currCountry.landscapes.append(c)
-                print("created Landscape ",text)
         if choiceStr == "np":
             if self.isUniq(text, currItem.children):
                 c = NotablePlace(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created NP ",text)
         if choiceStr == "t":
             if self.isUniq(text, currItem.children):
                 c = Town(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created Town ",text)
         if choiceStr == "dw":
             if self.isUniq(text, currItem.children):
                 c = Dwelling(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created Dwelling ",text)
         if choiceStr == "p":
             if self.isUniq(text, currItem.children):
                 c = Person(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created Peron ",text)
         if choiceStr == "m":
             if self.isUniq(text, currItem.children):
                 c = Monster(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created Monster ",text)
         if choiceStr == "i":
             if self.isUniq(text, currItem.children):
                 c = Item(text)
                 currItem.addChild(c)
+                currItem.childrenHelper.append(text)
                 currItem.children.append(c)
-                print("created Item ",text)
 
     def deleteTreeWidget(self): #Will need to call treeSelectionChanged() in here like in deleteTab()
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
         root = currCountry.tree.invisibleRootItem()
+
+        if isinstance(currItem, type(Landscape(""))):
+            a = currCountry.landscapesHelper.index(currItem.uName)
+            del currCountry.landscapesHelper[a]
+            del currCountry.landscapes[a]
+        else:
+            a = currItem.parent().childrenHelper.index(currItem.uName)
+            del currItem.parent().childrenHelper[a]
+            del currItem.parent().children[a]
         (currItem.parent() or root).removeChild(currItem)
+        self.treeSelectionChanged()
 
     @QtCore.Slot()
     def createTab(self):
@@ -166,21 +175,21 @@ class CountryNotebook(QtWidgets.QWidget):
             currCountry = self.currCountrySelection()
             self.notebook.addTab(a, text)
             self.countries.append(a)
-            if currCountry == None:
-                self.countryDetInfoField.setReadOnly(False)
+            if currCountry is None:
+                self.treeDetInfoField.setReadOnly(False)
 
     @QtCore.Slot()
     def deleteTab(self):
         currCountry = self.currCountrySelection()
-        if currCountry == None:
+        if currCountry is None:
             return
         currCountryIndex = self.countries.index(currCountry)
         self.notebook.removeTab(currCountryIndex)
         del self.countries[currCountryIndex]
         currCountry = self.currCountrySelection()
-        if currCountry == None:
-            self.countryDetInfoField.setReadOnly(True)
-            self.countryDetInfoField.clear()
+        if currCountry is None:
+            self.treeDetInfoField.setReadOnly(True)
+            self.treeDetInfoField.clear()
         self.treeSelectionChanged()
 
     def __init__(self, parent=None):
@@ -189,7 +198,7 @@ class CountryNotebook(QtWidgets.QWidget):
         self.countries = []
         self.currentTab = "" #Placeholder for future tab classes.
         self.notebook = QtWidgets.QTabWidget()
-        self.countryDetInfoField = QtWidgets.QPlainTextEdit()
+        self.treeDetInfoField = QtWidgets.QPlainTextEdit()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
 
@@ -199,8 +208,8 @@ class CountryNotebook(QtWidgets.QWidget):
         self.layout.addWidget(self.countryCreateGroup)
         self.layout.addWidget(self.featureCreateGroup)
         self.layout.addWidget(self.notebook)
-        self.layout.addWidget(self.countryDetInfoField)
-        self.countryDetInfoField.setReadOnly(True)
+        self.layout.addWidget(self.treeDetInfoField)
+        self.treeDetInfoField.setReadOnly(True)
         self.layout.addWidget(QtWidgets.QLabel("Country Information PlainTextEdit"))
 
         self.setLayout(self.layout)
@@ -210,7 +219,7 @@ class CountryNotebook(QtWidgets.QWidget):
         self.featureCreateGroup.featureCreateButton.released.connect(self.createTreeWidget)
         self.featureCreateGroup.featureDeleteButton.released.connect(self.deleteTreeWidget)
         self.notebook.currentChanged.connect(self.changeCountrySelection)
-        self.countryDetInfoField.textChanged.connect(self.saveDetInfo)
+        self.treeDetInfoField.textChanged.connect(self.saveDetInfo)
 
 class CountryTab(QtWidgets.QWidget):
 
@@ -223,8 +232,8 @@ class CountryTab(QtWidgets.QWidget):
         super().__init__()
 
         self.uName = name
-        self.countryDetInfo = ""
         self.landscapes = []
+        self.landscapesHelper = []
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
@@ -245,7 +254,9 @@ class treeObject(QtWidgets.QTreeWidgetItem):
 
         self.uName = ""
         self.detInfo = ""
+        self.detInfoT = ""
         self.children = []
+        self.childrenHelper = []
         self.possibleChildren = []
 
 class Landscape(treeObject):
