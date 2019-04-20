@@ -1,4 +1,4 @@
-import sys
+import sys, pickle
 from PySide2 import QtGui, QtCore, QtWidgets
 
 
@@ -91,9 +91,9 @@ class CountryNotebook(QtWidgets.QWidget):
     @QtCore.Slot()
     def saveDetInfo(self):
         currCountry = self.currCountrySelection()
-        currItem = currCountry.tree.currentItem() #Get current Widget Selected
-        if currCountry is None:
+        if (currCountry is None):
             return
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
         currItem.detInfoT = self.treeDetInfoField.toPlainText()
 
     @QtCore.Slot()
@@ -149,21 +149,24 @@ class CountryNotebook(QtWidgets.QWidget):
                 currItem.childrenHelper.append(text)
                 currItem.children.append(c)
 
-    def deleteTreeWidget(self): #Will need to call treeSelectionChanged() in here like in deleteTab()
-        currCountry = self.currCountrySelection()
-        currItem = currCountry.tree.currentItem() #Get current Widget Selected
-        root = currCountry.tree.invisibleRootItem()
+    def deleteTreeWidget(self):
+        try:
+            currCountry = self.currCountrySelection()
+            currItem = currCountry.tree.currentItem() #Get current Widget Selected
+            root = currCountry.tree.invisibleRootItem()
 
-        if isinstance(currItem, type(Landscape(""))):
-            a = currCountry.landscapesHelper.index(currItem.uName)
-            del currCountry.landscapesHelper[a]
-            del currCountry.landscapes[a]
-        else:
-            a = currItem.parent().childrenHelper.index(currItem.uName)
-            del currItem.parent().childrenHelper[a]
-            del currItem.parent().children[a]
-        (currItem.parent() or root).removeChild(currItem)
-        self.treeSelectionChanged()
+            if isinstance(currItem, type(Landscape(""))):
+                a = currCountry.landscapesHelper.index(currItem.uName)
+                del currCountry.landscapesHelper[a]
+                del currCountry.landscapes[a]
+            else:
+                a = currItem.parent().childrenHelper.index(currItem.uName)
+                del currItem.parent().childrenHelper[a]
+                del currItem.parent().children[a]
+            (currItem.parent() or root).removeChild(currItem)
+            self.treeSelectionChanged()
+        except:
+            pass
 
     @QtCore.Slot()
     def createTab(self):
@@ -319,7 +322,6 @@ class Item(treeObject):
         self.setText(0, name)
         self.setText(1, "Item")
 
-
 class MyWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
@@ -333,11 +335,17 @@ class MyWidget(QtWidgets.QWidget):
         self.parentGridLayout.addLayout(self.middleLayout, 0,0)
         self.setLayout(self.parentGridLayout)
 
+class MainWindow(QtWidgets.QMainWindow):
+
+    def __init__(self, parent=None):
+        super().__init__()
+
+        self.setCentralWidget(MyWidget())
 
 
 app = QtWidgets.QApplication(sys.argv)
 
-widget = MyWidget()
+widget = MainWindow()
 widget.setGeometry(300, 300, 500, 750)
 widget.setMaximumSize(500, 750) #x, y
 widget.show()
