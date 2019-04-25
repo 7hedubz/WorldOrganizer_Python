@@ -48,24 +48,29 @@ class CountryNotebook(QtWidgets.QWidget):
                 return False
         return True
 
+    def choicesReset(self):
+        for i in range(999):
+            try:
+                self.featureCreateGroup.featureChoices.removeItem(1)
+            except:
+                return
+
+    @QtCore.Slot()
+    def treeItemDblClk(self):
+        currCountry = self.currCountrySelection()
+        currItem = currCountry.tree.currentItem()
+        self.openDescWindows.append(DescWindow(currItem))
+
     @QtCore.Slot()
     def treeSelectionChanged(self):
         try:
             currCountry = self.currCountrySelection()
             currItem = currCountry.tree.currentItem()
-            # currCountry.detInfoField.setPlainText(currItem.detInfo)
-
-            # if currItem:
-                # currCountry.detInfoField.setReadOnly(False)
-            self.featureCreateGroup.featureChoices.removeItem(1)
-            self.featureCreateGroup.featureChoices.removeItem(1)
-            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.choicesReset()
             for ea in currItem.possibleChildren:
                 self.featureCreateGroup.featureChoices.addItem(ea[0], ea[1])
         except:
-            self.featureCreateGroup.featureChoices.removeItem(1)
-            self.featureCreateGroup.featureChoices.removeItem(1)
-            self.featureCreateGroup.featureChoices.removeItem(1)
+            self.choicesReset()
 
     @QtCore.Slot()
     def changeCountrySelection(self):
@@ -74,9 +79,11 @@ class CountryNotebook(QtWidgets.QWidget):
             self.currentTab = self.currCountrySelection()
             try:
                 oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
+                oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
             except:
                 pass
             self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
+            self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
         except:
             pass
 
@@ -186,6 +193,7 @@ class CountryNotebook(QtWidgets.QWidget):
 
         self.countries = []
         self.currentTab = "" #Placeholder for future tab classes.
+        self.openDescWindows = []
         self.notebook = QtWidgets.QTabWidget()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
@@ -257,7 +265,7 @@ class NotablePlace(treeObject):
     def __init__(self, name, Parent=None):
         super().__init__()
 
-        self.possibleChildren = [["Person", "p"], ["Monster", "m"], ["Item", "i"]]
+        self.possibleChildren = [["Dwelling", "dw"],["Person", "p"], ["Monster", "m"], ["Item", "i"]]
         self.uName = name
         self.type = "np"
         self.setText(0, name)
@@ -504,20 +512,28 @@ class DescWindow(QtWidgets.QMainWindow):
 
         if clas.type == "c":
             self.cw = self.setCentralWidget(DescriptorClasses.CountryDesc())
+            self.setWindowTitle("Test")
         if clas.type == "ls":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.LandscapeDesc())
+            self.setWindowTitle("Test")
         if clas.type == "np":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.NotablePlaceDesc())
+            self.setWindowTitle("Test")
         if clas.type == "t":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.TownDesc())
+            self.setWindowTitle("Test")
         if clas.type == "dw":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.DwellingDesc())
+            self.setWindowTitle("Test")
         if clas.type == "p":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.PersonDesc())
+            self.setWindowTitle("Test")
         if clas.type == "m":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.MonsterDesc())
+            self.setWindowTitle("Test")
         if clas.type == "i":
-            pass
+            self.cw = self.setCentralWidget(DescriptorClasses.ItemDesc())
+            self.setWindowTitle("Test")
 
         self.show()
 
