@@ -306,39 +306,47 @@ class MyWidget(QtWidgets.QWidget):
     def saveCountry(self, country):
         ret = []
         ret.append(country.uName)
+        ret.append("c")
         ret.append(len(country.landscapes))
         return ret
     def saveLandscape(self, landscape):
         ret = []
         ret.append(landscape.uName)
+        ret.append("ls")
         ret.append(len(landscape.children))
         return ret
     def saveNotablePlace(self, np):
         ret = []
         ret.append(np.uName)
+        ret.append("np")
         ret.append(len(np.children))
         return ret
     def saveTown(self, town):
         ret = []
         ret.append(town.uName)
+        ret.append("t")
         ret.append(len(town.children))
         return ret
     def saveDwelling(self, dwelling):
         ret = []
         ret.append(dwelling.uName)
+        ret.append("dw")
         ret.append(len(dwelling.children))
         return ret
     def savePerson(self, person):
         ret = []
         ret.append(person.uName)
+        ret.append("p")
         return ret
     def saveMonster(self, monster):
         ret = []
         ret.append(monster.uName)
+        ret.append("m")
         return ret
     def saveItem(self, item):
         ret = []
         ret.append(item.uName)
+        ret.append("i")
         return ret
 
 
@@ -358,81 +366,86 @@ class MyWidget(QtWidgets.QWidget):
             # The number at the end of a list indicates how many lists after that are childed underneath it.
             # The following list beyond that number is a new piece (whether that be a Dwelling or Country)
             if len(eaCou.landscapes) == 0:
-                print("There are no landscapes in this country.")
+                #print("There are no landscapes in this country.")
+                pass
     # And now each landscape to find towns/notable places
             else:
                 for eaLand in eaCou.landscapes:
                     self.parentSaveInfo[eaCou.uName].append(self.saveLandscape(eaLand))
                     if len(eaLand.children) == 0:
-                        print("There are no children in this landscape.")
+                        #print("There are no children in this landscape.")
+                        pass
         # And now each child of the landscape, to see if it's a notable place
                     else:
                         for eaTNP in eaLand.children:
                             if isinstance(eaTNP, type(NotablePlace(""))):
-                                print("This is a Notable Place!")
+                                #print("This is a Notable Place!")
                                 self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaTNP))
             # And now each child of the notable place to see if it has children.
                                 if len(eaTNP.children) == 0:
-                                    print("There are no children in this Notable Place.")
+                                    # print("There are no children in this Notable Place.")
+                                    pass
                                 else:
                     # And now each child of the notable place to see if it has children.
                                     for eaChil in eaTNP.children:
                                         if isinstance(eaChil, type(Person(""))):
-                                            print("There is a Person in this Notable place!")
+                                            # print("There is a Person in this Notable place!")
                                             self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaChil))
                     # And now save the Person info.
                                         elif isinstance(eaChil, type(Monster(""))):
-                                            print("There is a Monster in this Notable place!")
+                                            # print("There is a Monster in this Notable place!")
                                             self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaChil))
                     # And now save the Monster info
                                         elif isinstance(eaChil, type(Item(""))):
-                                            print("There is an Item in this Notable place!")
+                                            # print("There is an Item in this Notable place!")
                                             self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaChil))
                     # And now save the Item info
         # And now each child of the landscape, to see if it's a town
                             elif isinstance(eaTNP, type(Town(""))):
-                                print("This is a town!")
+                                # print("This is a town!")
                                 self.parentSaveInfo[eaCou.uName].append(self.saveTown(eaTNP))
             # And now each child of the town to see if it has children
                                 if len(eaTNP.children) == 0:
-                                    print("There are no children in this Town.")
-
+                                    # print("There are no children in this Town.")
+                                    pass
                                 for eaChil in eaTNP.children:
                                     if isinstance(eaChil, type(Dwelling(""))):
                                         self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaChil))
                                         if len(eaChil.children) == 0:
-                                            print("There are no children in this Dwelling.")
+                                            # print("There are no children in this Dwelling.")
+                                            pass
                                         else:
                                             for eaUnit in eaChil.children:
                                                 if isinstance(eaUnit, type(Person(""))):
-                                                    print("There is a Person in this Dwelling!")
+                                                    # print("There is a Person in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaUnit))
                             # And now save the Person info.
                                                 elif isinstance(eaUnit, type(Monster(""))):
-                                                    print("There is a Monster in this Dwelling!")
+                                                    # print("There is a Monster in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaUnit))
                             # And now save the Monster info
                                                 elif isinstance(eaUnit, type(Item(""))):
-                                                    print("There is an Item in this Dwelling!")
+                                                    # print("There is an Item in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaUnit))
                             # And now save the Item info
 
                                     elif isinstance(eaChil, type(NotablePlace(""))):
                                         self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaChil))
                                         if len(eaChil.children) == 0:
-                                            print("There are no children in this NotablePlace")
+                                            # print("There are no children in this NotablePlace")
+                                            pass
                                         else:
                                             for eaUnit in eaChil.children:
-                                                if isinstance(eaNP, type(Person(""))):
-                                                    print("There is a Person in this Dwelling!")
+                                                if isinstance(eaUnit, type(Person(""))):
+                                                    # print("There is a Person in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaUnit))
                             # And now save the Person info.
-                                                elif isinstance(eaNP, type(Monster(""))):
-                                                    print("There is a Monster in this Dwelling!")
+                                                elif isinstance(eaUnit, type(Monster(""))):
+                                                    # print("There is a Monster in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaUnit))
                             # And now save the Monster info
-                                                elif isinstance(eaNP, type(Item(""))):
-                                                    print("There is an Item in this Dwelling!")
+                                                elif isinstance(eaUnit, type(Item(""))):
+                                                    #  print("There is an Item in this Dwelling!")
                                                     self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaUnit))
                                 # And now save the Item info
         print(self.parentSaveInfo)
@@ -456,6 +469,9 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         myWidgetVar = MyWidget()
 
+        self.setGeometry(300, 300, 500, 800)
+        self.setMaximumSize(500, 800) #x, y
+
         parentMenu = self.menuBar()
         fileMenu = QtWidgets.QMenu("File")
         fileMenuAction = fileMenu.addAction("Save (e)", myWidgetVar.parentSaveFunc)
@@ -470,12 +486,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(myWidgetVar)
 
+class DescWindow(QtWidgets.QMainWindow):
+
+    def __init__(self, parent=None):
+        super().__init__()
+        self.setGeometry(350,350, 400,600)
+        self.setMaximumSize(400,600)
+
 
 app = QtWidgets.QApplication(sys.argv)
 
 myWindow = MainWindow()
-myWindow.setGeometry(300, 300, 500, 750)
-myWindow.setMaximumSize(1920, 1080) #x, y
 myWindow.show()
 
 sys.exit(app.exec_())
