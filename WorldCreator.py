@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, DescriptorClasses
 from PySide2 import QtGui, QtCore, QtWidgets
 
 class AddCountry(QtWidgets.QWidget):
@@ -217,6 +217,7 @@ class CountryTab(QtWidgets.QWidget):
         self.uName = name
         self.landscapes = []
         self.landscapesHelper = []
+        self.type = "c"
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
@@ -238,6 +239,7 @@ class treeObject(QtWidgets.QTreeWidgetItem):
         self.uName = ""
         self.detInfo = ""
         self.children = []
+        self.type = ""
         self.childrenHelper = []
         self.possibleChildren = []
 
@@ -247,6 +249,7 @@ class Landscape(treeObject):
 
         self.possibleChildren = [["Notable Place", "np"], ["Town", "t"]]
         self.uName = name
+        self.type = "ls"
         self.setText(0, name)
         self.setText(1, "Landscape")
 
@@ -256,6 +259,7 @@ class NotablePlace(treeObject):
 
         self.possibleChildren = [["Person", "p"], ["Monster", "m"], ["Item", "i"]]
         self.uName = name
+        self.type = "np"
         self.setText(0, name)
         self.setText(1, "Notable Place")
 
@@ -265,6 +269,7 @@ class Town(treeObject):
 
         self.possibleChildren = [["Dwelling", "dw"], ["Notable Place", "np"]]
         self.uName = name
+        self.type = "t"
         self.setText(0, name)
         self.setText(1, "Town")
 
@@ -274,6 +279,7 @@ class Dwelling(treeObject):
 
         self.possibleChildren = [["Person", "p"], ["Monster", "m"], ["Item", "i"]]
         self.uName = name
+        self.type = "dw"
         self.setText(0, name)
         self.setText(1, "Dwelling")
 
@@ -282,6 +288,7 @@ class Person(treeObject):
         super().__init__()
 
         self.uName = name
+        self.type = "p"
         self.setText(0, name)
         self.setText(1, "Person")
 
@@ -290,6 +297,7 @@ class Monster(treeObject):
         super().__init__()
 
         self.uName = name
+        self.type = "m"
         self.setText(0, name)
         self.setText(1, "Monster")
 
@@ -298,6 +306,7 @@ class Item(treeObject):
         super().__init__()
 
         self.uName = name
+        self.type = "i"
         self.setText(0, name)
         self.setText(1, "Item")
 
@@ -488,10 +497,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class DescWindow(QtWidgets.QMainWindow):
 
-    def __init__(self, parent=None):
+    def __init__(self, clas, parent=None):
         super().__init__()
         self.setGeometry(350,350, 400,600)
         self.setMaximumSize(400,600)
+
+        if clas.type == "c":
+            self.cw = self.setCentralWidget(DescriptorClasses.CountryDesc())
+        if clas.type == "ls":
+            pass
+        if clas.type == "np":
+            pass
+        if clas.type == "t":
+            pass
+        if clas.type == "dw":
+            pass
+        if clas.type == "p":
+            pass
+        if clas.type == "m":
+            pass
+        if clas.type == "i":
+            pass
+
+        self.show()
 
 
 app = QtWidgets.QApplication(sys.argv)
