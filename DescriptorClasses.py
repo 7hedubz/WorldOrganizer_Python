@@ -1,17 +1,30 @@
 # Country, Landscape, NotablePlace, Town, Dwelling, Person, Monster, Item
 from PySide2 import QtGui, QtCore, QtWidgets
 
+class TempatureChoices(QtWidgets.QWidget()):
+    def __init__(self):
+        super().__init__()
+        self.tempChoices = QtWidgets.QComboBox()
 
-class MasterDesc(QtWidgets.QWidget):
-        def __init__(self, parent=None):
+class NameChange(QtWidgets.QWidget()):
+        def __init__(self):
             super().__init__()
 
+            self.nameChangeLabel = QtWidgets.QLabel("Name : ")
             self.nameChangeEdit = QtWidgets.QLineEdit()
 
-            self.layout = QtWidgets.QGridLayout()
-            self.layout.addWidget(QtWidgets.QLabel("Name : "), 0, 0)
-            self.layout.addWidget(self.nameChangeEdit, 0, 1)
+            self.layout = QtWidgets.QHBoxLayout
 
+class MasterDesc(QtWidgets.QWidget()):
+        def __init__(self, clas, country):
+            super().__init__()
+            self.clas = clas
+            self.country = country
+
+            self.nameChanger = NameChange()
+
+            self.layout = QtWidgets.QVBoxLayout()
+            self.layout.addWidget(self.nameChanger)
             self.setLayout(self.layout)
 
 class CountryDesc(MasterDesc):

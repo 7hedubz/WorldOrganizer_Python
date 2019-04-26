@@ -56,16 +56,16 @@ class CountryNotebook(QtWidgets.QWidget):
                 return
 
     @QtCore.Slot()
-    def tabBarDblClk(self):
+    def tabBarDblClk(self, index):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
-        self.openDescWindows.append(DescWindow(currCountry, currCountry))
+        self.openDescWindows.append(DescWindow(currCountry, currCountry, index))
 
     @QtCore.Slot()
     def treeItemDblClk(self):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
-        self.openDescWindows.append(DescWindow(currItem, currCountry))
+        self.openDescWindows.append(DescWindow(currItem, currCountry, -1))
         if currCountry.tree.isItemExpanded(currItem):
             currCountry.tree.setItemExpanded(currItem, False)
         else:
@@ -274,6 +274,8 @@ class Landscape(treeObject):
         self.possibleChildren = [["Notable Place", "np"], ["Town", "t"]]
         self.uName = name
         self.type = "ls"
+        temperate = ""
+        self.desc = ""
         self.setText(0, name)
         self.setText(1, "Landscape")
 
@@ -522,8 +524,6 @@ class MainWindow(QtWidgets.QMainWindow):
 class DescWindow(QtWidgets.QMainWindow):
 
     def isUniq(self, text, listToSrch):
-        if text.replace(" ", "") is "":
-            return
         for ea in listToSrch:
             if text == ea.uName:
                 return False
@@ -531,26 +531,31 @@ class DescWindow(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
     def uNameChange(self):
+        text = self.w.nameChanger.nameChangeEdit.text()
+        if text.replace(" ", "") is "":
+            return
         if self.clas.type == "c":
-            if self.isUniq(self.w.nameChangeEdit.text(), self.country.cNB.countries):
-                pass
+            if self.isUniq(text, self.country.cNB.countries):
+                self.country.cNB.notebook.setTabText(self.CI, text)
+                self.clas.uName = text
         elif self.clas.type == "ls":
-            if self.isUniq(self.w.nameChangeEdit.text(), self.country.children):
-                self.clas.setText(0, self.w.nameChangeEdit.text())
-                self.setWindowTitle(self.clas.type+" - "+self.w.nameChangeEdit.text())
-                self.clas.uName = self.w.nameChangeEdit.text()
+            if self.isUniq(text, self.country.children):
+                self.clas.setText(0, text)
+                self.setWindowTitle(self.clas.type+" - "+text)
+                self.clas.uName = text
         else:
-            if self.isUniq(self.w.nameChangeEdit.text(), self.currItem.parent().children):
-                self.clas.setText(0, self.w.nameChangeEdit.text())
-                self.setWindowTitle(self.clas.type+" - "+self.w.nameChangeEdit.text())
-                self.clas.uName = self.w.nameChangeEdit.text()
+            if self.isUniq(text, self.currItem.parent().children):
+                self.clas.setText(0, text)
+                self.setWindowTitle(self.clas.type+" - "+text)
+                self.clas.uName = text
 
-    def __init__(self, clas, country):
+    def __init__(self, clas, country, countryIndex):
         super().__init__()
         self.setGeometry(350,350, 400,600)
         self.setMaximumSize(400,600)
         self.clas = clas
         self.country = country
+        self.CI = countryIndex
 
         if clas.type == "c":
             self.w = DescriptorClasses.CountryDesc()
@@ -560,23 +565,23 @@ class DescWindow(QtWidgets.QMainWindow):
             self.currItem = country.tree.currentItem()
 
             if clas.type == "ls":
-                self.w = DescriptorClasses.MonsterDesc()
+                self.w = DescriptorClasses.LandscapeDesc()
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("ls - "+clas.uName)
             elif clas.type == "np":
-                self.w = DescriptorClasses.MonsterDesc()
+                self.w = DescriptorClasses.NotablePlaceDesc()
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("np - "+clas.uName)
             elif clas.type == "t":
-                self.w = DescriptorClasses.MonsterDesc()
+                self.w = DescriptorClasses.TownDesc()
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("t - "+clas.uName)
             elif clas.type == "dw":
-                self.w = DescriptorClasses.MonsterDesc()
+                self.w = DescriptorClasses.DwellingDesc()
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("dw - "+clas.uName)
             elif clas.type == "p":
-                self.w = DescriptorClasses.MonsterDesc()
+                self.w = DescriptorClasses.PersonDesc()
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("p - "+clas.uName)
             elif clas.type == "m":
@@ -588,8 +593,8 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.cw = self.setCentralWidget(self.w)
                 self.setWindowTitle("i - "+clas.uName)
 
-        self.w.nameChangeEdit.setPlaceholderText(clas.uName)
-        self.w.nameChangeEdit.returnPressed.connect(self.uNameChange)
+        self.w.nameChanger.nameChangeEdit.setPlaceholderText(clas.uName)
+        self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
         self.show()
 
 
