@@ -6,6 +6,14 @@ class MasterDesc(QtWidgets.QWidget):
         def __init__(self, parent=None):
             super().__init__()
 
+            self.nameChangeEdit = QtWidgets.QLineEdit()
+
+            self.layout = QtWidgets.QGridLayout()
+            self.layout.addWidget(QtWidgets.QLabel("Name : "), 0, 0)
+            self.layout.addWidget(self.nameChangeEdit, 0, 1)
+
+            self.setLayout(self.layout)
+
 class CountryDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
