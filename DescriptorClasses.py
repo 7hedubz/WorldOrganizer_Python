@@ -1,42 +1,39 @@
 # Country, Landscape, NotablePlace, Town, Dwelling, Person, Monster, Item
 from PySide2 import QtGui, QtCore, QtWidgets
 
-class CountryDesc(QtWidgets.QWidget):
 
+class MasterDesc(QtWidgets.QWidget):
         def __init__(self, parent=None):
             super().__init__()
 
-class LandscapeDesc(QtWidgets.QWidget):
-
+class CountryDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class NotablePlaceDesc(QtWidgets.QWidget):
-
+class LandscapeDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class TownDesc(QtWidgets.QWidget):
-
+class NotablePlaceDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class DwellingDesc(QtWidgets.QWidget):
-
+class TownDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class PersonDesc(QtWidgets.QWidget):
-
+class DwellingDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class MonsterDesc(QtWidgets.QWidget):
-
+class PersonDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()
 
-class ItemDesc(QtWidgets.QWidget):
+class MonsterDesc(MasterDesc):
+        def __init__(self, parent=None):
+            super().__init__()
 
+class ItemDesc(MasterDesc):
         def __init__(self, parent=None):
             super().__init__()

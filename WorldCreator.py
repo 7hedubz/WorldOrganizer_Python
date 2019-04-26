@@ -60,6 +60,13 @@ class CountryNotebook(QtWidgets.QWidget):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
         self.openDescWindows.append(DescWindow(currItem))
+        if currCountry.tree.isItemExpanded(currItem):
+            currCountry.tree.setItemExpanded(currItem, False)
+        else:
+            try:
+                currCountry.tree.setItemExpanded(currItem, True)
+            except:
+                pass
 
     @QtCore.Slot()
     def treeSelectionChanged(self):
@@ -512,28 +519,28 @@ class DescWindow(QtWidgets.QMainWindow):
 
         if clas.type == "c":
             self.cw = self.setCentralWidget(DescriptorClasses.CountryDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Country - "+clas.uName)
         if clas.type == "ls":
             self.cw = self.setCentralWidget(DescriptorClasses.LandscapeDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Landscape - "+clas.uName)
         if clas.type == "np":
             self.cw = self.setCentralWidget(DescriptorClasses.NotablePlaceDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Notalple Place - "+clas.uName)
         if clas.type == "t":
             self.cw = self.setCentralWidget(DescriptorClasses.TownDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Town - "+clas.uName)
         if clas.type == "dw":
             self.cw = self.setCentralWidget(DescriptorClasses.DwellingDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Dwelling - "+clas.uName)
         if clas.type == "p":
             self.cw = self.setCentralWidget(DescriptorClasses.PersonDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Person - "+clas.uName)
         if clas.type == "m":
             self.cw = self.setCentralWidget(DescriptorClasses.MonsterDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Monster - "+clas.uName)
         if clas.type == "i":
             self.cw = self.setCentralWidget(DescriptorClasses.ItemDesc())
-            self.setWindowTitle("Test")
+            self.setWindowTitle("Item - "+clas.uName)
 
         self.show()
 
