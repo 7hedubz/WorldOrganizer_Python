@@ -158,7 +158,10 @@ class CountryNotebook(QtWidgets.QWidget):
         if choiceStr == "i":
             if self.isUniq(text, currItem.children):
                 c = Item(text)
-        currItem.addChild(c)
+        try:
+            currItem.addChild(c)
+        except: #Exception occurs on ls creation
+            pass
         currCountry.childrenHelper.append(text)
         currCountry.children.append(c)
         c.parentCountry = currCountry
@@ -274,8 +277,8 @@ class Landscape(treeObject):
         self.possibleChildren = [["Notable Place", "np"], ["Town", "t"]]
         self.uName = name
         self.Type = "ls"
-        temperate = ""
-        self.desc = ""
+        self.climateInfo = []
+
         self.setText(0, name)
         self.setText(1, "Landscape")
 
@@ -538,6 +541,21 @@ class MainWindow(QtWidgets.QMainWindow):
 class DescWindow(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
+    def climateSet(self):
+        text = self.w.climateChoice.climateAdd.climateAddField.text()
+        if text.replace(" ", "") is "":
+            return
+        if self.isUniq(text, self.clas.climateInfo):
+            self.w.climateChoice.listChoices.addItem(text)
+            self.clas.climateInfo.append(text)
+
+    @QtCore.Slot()
+    def deleteClimate(self, item):
+        row = self.w.climateChoice.listChoices.currentRow()
+        self.w.climateChoice.listChoices.takeItem(row)
+        del self.clas.climateInfo[row]
+
+    @QtCore.Slot()
     def closeEvent(self, event):
         w = False
         for openWindow in self.country.cNB.openDescWindows:
@@ -554,8 +572,12 @@ class DescWindow(QtWidgets.QMainWindow):
 
     def isUniq(self, text, listToSrch):
         for ea in listToSrch:
-            if text == ea.uName:
-                return False
+            try:
+                if text == ea.uName:
+                    return False
+            except:
+                if text == ea:
+                    return False
         return True
 
     @QtCore.Slot()
@@ -601,43 +623,42 @@ class DescWindow(QtWidgets.QMainWindow):
 
             if clas.Type == "ls":
                 self.w = DescriptorClasses.LandscapeDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "ls"
                 self.setWindowTitle("ls - "+self.country.uName+" -> "+clas.uName)
+
+                self.w.nameChanger.nameChangeEdit.setPlaceholderText(self.clas.uName)
+                self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
+                self.w.climateChoice.climateAdd.climateAddField.returnPressed.connect(self.climateSet)
+                self.w.climateChoice.listChoices.itemDoubleClicked.connect(self.deleteClimate)
+
             elif clas.Type == "np":
                 self.w = DescriptorClasses.NotablePlaceDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "np"
                 self.setWindowTitle("np - "+self.country.uName+" -> "+clas.uName)
             elif clas.Type == "t":
                 self.w = DescriptorClasses.TownDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "t"
                 self.setWindowTitle("t - "+self.country.uName+" -> "+clas.uName)
             elif clas.Type == "dw":
                 self.w = DescriptorClasses.DwellingDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "dw"
                 self.setWindowTitle("dw - "+self.country.uName+" -> "+clas.uName)
             elif clas.Type == "p":
                 self.w = DescriptorClasses.PersonDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "p"
                 self.setWindowTitle("p - "+self.country.uName+" -> "+clas.uName)
             elif clas.Type == "m":
                 self.w = DescriptorClasses.MonsterDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "m"
                 self.setWindowTitle("m - "+self.country.uName+" -> "+clas.uName)
             elif clas.Type == "i":
                 self.w = DescriptorClasses.ItemDesc(self.clas)
-                self.cw = self.setCentralWidget(self.w)
                 self.Type = "i"
                 self.setWindowTitle("i - "+self.country.uName+" -> "+clas.uName)
+
+            self.cw = self.setCentralWidget(self.w)
             self.uName = self.clas.uName
 
-        self.w.nameChanger.nameChangeEdit.setPlaceholderText(self.clas.uName)
-        self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
         self.show()
 
 app = QtWidgets.QApplication(sys.argv)
