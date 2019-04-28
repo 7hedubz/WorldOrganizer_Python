@@ -6,6 +6,14 @@ class TempatureChoices(QtWidgets.QWidget):
         super().__init__()
         self.tempChoices = QtWidgets.QComboBox()
 
+
+        self.layout = QtWidgets.QHBoxLayout()
+        self.layout.addWidget(QtWidgets.QLabel("Tempature : "))
+        self.layout.addWidget(self.tempChoices)
+        self.layout.addSpacing(200)
+
+        self.setLayout(self.layout)
+
 class NameChange(QtWidgets.QWidget):
         def __init__(self):
             super().__init__()
@@ -14,6 +22,11 @@ class NameChange(QtWidgets.QWidget):
             self.nameChangeEdit = QtWidgets.QLineEdit()
 
             self.layout = QtWidgets.QHBoxLayout()
+            self.layout.addWidget(self.nameChangeLabel)
+            self.layout.addWidget(self.nameChangeEdit)
+            self.layout.addSpacing(200)
+
+            self.setLayout(self.layout)
 
 
 class MasterDesc(QtWidgets.QWidget):
@@ -25,7 +38,6 @@ class MasterDesc(QtWidgets.QWidget):
             self.layout.addWidget(self.nameChanger)
             self.setLayout(self.layout)
 
-
 class CountryDesc(MasterDesc):
         def __init__(self, country):
             super().__init__()
@@ -35,6 +47,7 @@ class LandscapeDesc(MasterDesc):
             super().__init__()
 
             self.layout.addWidget(TempatureChoices())
+            self.layout.addSpacing(500)
 
 class NotablePlaceDesc(MasterDesc):
         def __init__(self, clas):
