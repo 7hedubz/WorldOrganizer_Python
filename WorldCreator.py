@@ -67,7 +67,7 @@ class CountryNotebook(QtWidgets.QWidget):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
         if self.isUniq(currItem.uName, self.openDescWindows):
-            self.openDescWindows.append(DescWindow(currItem, currCountry, -1))
+            self.openDescWindows.append(DescWindow(currItem, currCountry, -99))
             if currCountry.tree.isItemExpanded(currItem):
                 currCountry.tree.setItemExpanded(currItem, False)
             else:
@@ -95,11 +95,11 @@ class CountryNotebook(QtWidgets.QWidget):
             try:
                 oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
                 oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
-                self.notebook.tabBarDoubleClicked.disconnect(self.treeItemDblClk)
+                self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
             except:
                 pass
             self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
-            self.currentTab.tree.itemDoubleClicked.connect(self.tabBarDblClk)
+            self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
             self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
         except:
             pass
@@ -551,16 +551,15 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.setWindowTitle(self.clas.type+" - "+text)
                 self.clas.uName = text
 
-    def __init__(self, clas, country, countryIndex):
+    def __init__(self, clas, country, countryIndex,flags="WA_DeleteOnClose()"):
         super().__init__()
         self.setGeometry(350,350, 400,600)
         self.setMaximumSize(400,600)
         self.clas = clas
         self.country = country
         self.CI = countryIndex
-        print(clas)
 
-        if countryIndex >= 0:
+        if self.CI >= 0:
             self.w = DescriptorClasses.CountryDesc(self.country)
             self.cw = self.setCentralWidget(self.w)
             self.clas = self.country
