@@ -55,7 +55,7 @@ class CountryNotebook(QtWidgets.QWidget):
             except:
                 return
 
-    @QtCore.Slot()
+
     def tabBarDblClk(self, index):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
@@ -67,7 +67,7 @@ class CountryNotebook(QtWidgets.QWidget):
 
         self.openDescWindows.append(DescWindow(currItem, currCountry, index))
 
-    @QtCore.Slot()
+
     def treeItemDblClk(self):
         currCountry = self.currCountrySelection()
         currItem = currCountry.tree.currentItem()
@@ -90,7 +90,7 @@ class CountryNotebook(QtWidgets.QWidget):
             except:
                 pass
 
-    @QtCore.Slot()
+
     def treeSelectionChanged(self):
         try:
             currCountry = self.currCountrySelection()
@@ -101,7 +101,7 @@ class CountryNotebook(QtWidgets.QWidget):
         except:
             self.choicesReset()
 
-    @QtCore.Slot()
+
     def changeCountrySelection(self):
         try:
             oldSelection = self.currentTab
@@ -118,67 +118,69 @@ class CountryNotebook(QtWidgets.QWidget):
         except:
             pass
 
-    @QtCore.Slot()
+
     def saveDetInfo(self):
         currCountry = self.currCountrySelection()
         if (currCountry is None):
             return
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
 
-    def createTreeWidgetFunc(self, choiceStr, text, currCountry):
+    def createTreeWidgetFunc(self, choiceStr, text, currCountry, climateInfo = [], parentName = None, parentType = "", parent = None):
         c = ""
+        if parent is None:
+            pass #Figure it out
+        else:
+            parentItem = parent
         if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
-        currItem = currCountry.tree.currentItem() #Get current Widget Selected
         if text.replace(" ", "") is "":
             return #The only thing in the name is spaces, NO FEATURE FOR YOU
         if choiceStr == "ls": #Make a landscape
             if self.isUniq(text, currCountry.children):
                 c = Landscape(text)
+                if climateInfo:
+                    c.climateInfo = climateInfo
                 currCountry.tree.addTopLevelItem(c)
         if choiceStr == "np":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = NotablePlace(text)
         if choiceStr == "t":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = Town(text)
         if choiceStr == "dw":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = Dwelling(text)
         if choiceStr == "p":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = Person(text)
         if choiceStr == "m":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = Monster(text)
         if choiceStr == "i":
-            if self.isUniq(text, currItem.children):
+            if self.isUniq(text, parentItem.children):
                 c = Item(text)
         try:
-            currItem.addChild(c)
-            currItem.childrenHelper.append(text)
-            currItem.children.append(c)
-            print(currItem.parent().children)
+            parentItem.addChild(c)
+            parentItem.childrenHelper.append(text)
+            parentItem.children.append(c)
         except: #Exception occurs on ls creation
             pass
         currCountry.childrenHelper.append(text)
         currCountry.children.append(c)
+        return c
 
-    @QtCore.Slot()
+
     def createTreeWidget(self):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
         text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
         currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
-        self.createTreeWidgetFunc(choiceStr, text, currCountry)
+        self.createTreeWidgetFunc(choiceStr, text, currCountry, None, None, None, currCountry.tree.currentItem())
 
     def deleteTreeWidget(self):
         try:
             currCountry = self.currCountrySelection()
-            print("1")
             currItem = currCountry.tree.currentItem() #Get current Widget Selected
-            print("2")
             root = currCountry.tree.invisibleRootItem()
-            print("3")
 
             if isinstance(currItem, type(Landscape(""))):
                 a = currCountry.childrenHelper.index(currItem.uName)
@@ -186,11 +188,9 @@ class CountryNotebook(QtWidgets.QWidget):
                 del currCountry.children[a]
             else:
                 a = currItem.parent().childrenHelper.index(currItem.uName)
-                print("4")
                 del currItem.parent().childrenHelper[a]
-                print("5")
                 del currItem.parent().children[a]
-                print("6")
+
             (currItem.parent() or root).removeChild(currItem)
             self.treeSelectionChanged()
         except:
@@ -201,8 +201,9 @@ class CountryNotebook(QtWidgets.QWidget):
         self.currCountry = self.currCountrySelection()
         self.notebook.addTab(a, text)
         self.countries.append(a)
+        return a
 
-    @QtCore.Slot()
+
     def createTab(self):
         text = self.countryCreateGroup.countryNameField.text()
         if text.replace(" ", "") is "":
@@ -210,7 +211,7 @@ class CountryNotebook(QtWidgets.QWidget):
         if self.isUniq(text, self.countries):
             self.createTabFunc(text)
 
-    @QtCore.Slot()
+
     def deleteTab(self):
         currCountry = self.currCountrySelection()
         if currCountry is None:
@@ -247,7 +248,7 @@ class CountryNotebook(QtWidgets.QWidget):
 
 class CountryTab(QtWidgets.QWidget):
 
-    @QtCore.Slot()
+
     def saveDetInfo(self):
         currItem = self.tree.currentItem()
         # currItem.detInfo = self.detInfoField.toPlainText()
@@ -366,13 +367,15 @@ class MyWidget(QtWidgets.QWidget):
         ret = []
         ret.append(landscape.uName)
         ret.append("ls")
-        ret.append(landscape.climateInfo)
         ret.append(len(landscape.children))
+        ret.append(landscape.climateInfo)
         return ret
     def saveNotablePlace(self, np):
         ret = []
         ret.append(np.uName)
         ret.append("np")
+        ret.append([np.parent().uName, np.parent().Type])
+        print(ret[2])
         ret.append(len(np.children))
         return ret
     def saveTown(self, town):
@@ -380,7 +383,6 @@ class MyWidget(QtWidgets.QWidget):
         ret.append(town.uName)
         ret.append("t")
         ret.append(len(town.children))
-        print(len(town.children))
         return ret
     def saveDwelling(self, dwelling):
         ret = []
@@ -404,8 +406,6 @@ class MyWidget(QtWidgets.QWidget):
         ret.append("i")
         return ret
 
-
-    @QtCore.Slot()
     def parentSaveFunc(self):
         print("Trying to save")
         countries = self.notebook.countries
@@ -473,9 +473,33 @@ class MyWidget(QtWidgets.QWidget):
                                         elif isinstance(eaPMI, type(Item(""))):
                                             self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
         print(self.parentSaveInfo)
+        with open("data_file2.json", "w") as write_file:
+            json.dump(self.parentSaveInfo, write_file, indent=4)
+            print("Saved!")
+
+    def loadCountry(self, text):
+        a = self.notebook.createTabFunc(text)
+        return a
+    def loadLandscape(self, lst, country):
+        for item in lst:
+            if item[1] == "ls":
+                a = self.notebook.createTreeWidgetFunc(item[1], item[0], country, item[3], None,)
+                if item[2] > 0:
+                    pass
+
+    def loadNotablePlace(self, startingPoint, endingPoint, lst, parentItem):
+        pass
 
     def parentLoadFunc(self):
-        pass
+        with open("data_file2.json", "r") as read_file:
+            data = json.load(read_file)
+        for key, value in data.items():
+            self.fullList = value
+            for item in value:
+                if item[1] =="c":
+                    country = self.loadCountry(item[0])
+                    if item[2] > 0:
+                        a = self.loadLandscape(self.fullList, country)
 
     def __init__(self, parent=None):
         super().__init__()
@@ -514,7 +538,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.parentMenu = self.menuBar()
         self.fileMenu = QtWidgets.QMenu("File")
         self.fileMenuAction = self.fileMenu.addAction("Save (e)", self.myWidgetVar.parentSaveFunc)
-        self.fileMenuAction = self.fileMenu.addAction("Load (e)")
+        self.fileMenuAction = self.fileMenu.addAction("Load (e)", self.myWidgetVar.parentLoadFunc)
 
         self.deleteMenu = QtWidgets.QMenu("Delete")
         self.deleteCountryAction = self.deleteMenu.addAction("Delete Country", self.myWidgetVar.notebook.deleteTab)
@@ -527,7 +551,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class DescWindow(QtWidgets.QMainWindow):
 
-    @QtCore.Slot()
+
     def climateSet(self):
         text = self.w.climateChoice.climateAdd.climateAddField.text()
         if text.replace(" ", "") is "":
@@ -537,13 +561,11 @@ class DescWindow(QtWidgets.QMainWindow):
             self.clas.climateInfo.append(text)
             print(self.clas.climateInfo)
 
-    @QtCore.Slot()
     def deleteClimate(self, item):
         row = self.w.climateChoice.listChoices.currentRow()
         self.w.climateChoice.listChoices.takeItem(row)
         del self.clas.climateInfo[row]
 
-    @QtCore.Slot()
     def closeEvent(self, event):
         w = False
         for openWindow in self.country.cNB.openDescWindows:
@@ -568,7 +590,7 @@ class DescWindow(QtWidgets.QMainWindow):
                     return False
         return True
 
-    @QtCore.Slot()
+
     def uNameChange(self):
         text = self.w.nameChanger.nameChangeEdit.text()
         if text.replace(" ", "") is "":
