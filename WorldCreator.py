@@ -54,43 +54,6 @@ class CountryNotebook(QtWidgets.QWidget):
                 self.featureCreateGroup.featureChoices.removeItem(1)
             except:
                 return
-                
-    def createTreeWidgetFunc(self, choiceStr, text, currCountry):
-        c = ""
-        if currCountry is None:
-            return #If there's no country break out! We can't make a feature with no home!
-        currItem = currCountry.tree.currentItem() #Get current Widget Selected
-        if text.replace(" ", "") is "":
-            return #The only thing in the name is spaces, NO FEATURE FOR YOU
-        if choiceStr == "ls": #Make a landscape
-            if self.isUniq(text, currCountry.children):
-                c = Landscape(text)
-                currCountry.tree.addTopLevelItem(c)
-        if choiceStr == "np":
-            if self.isUniq(text, currItem.children):
-                c = NotablePlace(text)
-        if choiceStr == "t":
-            if self.isUniq(text, currItem.children):
-                c = Town(text)
-        if choiceStr == "dw":
-            if self.isUniq(text, currItem.children):
-                c = Dwelling(text)
-        if choiceStr == "p":
-            if self.isUniq(text, currItem.children):
-                c = Person(text)
-        if choiceStr == "m":
-            if self.isUniq(text, currItem.children):
-                c = Monster(text)
-        if choiceStr == "i":
-            if self.isUniq(text, currItem.children):
-                c = Item(text)
-        try:
-            currItem.addChild(c)
-        except: #Exception occurs on ls creation
-            pass
-        currCountry.childrenHelper.append(text)
-        currCountry.children.append(c)
-        c.parentCountry = currCountry
 
     @QtCore.Slot()
     def tabBarDblClk(self, index):
@@ -162,6 +125,45 @@ class CountryNotebook(QtWidgets.QWidget):
             return
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
 
+    def createTreeWidgetFunc(self, choiceStr, text, currCountry):
+        c = ""
+        if currCountry is None:
+            return #If there's no country break out! We can't make a feature with no home!
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
+        if text.replace(" ", "") is "":
+            return #The only thing in the name is spaces, NO FEATURE FOR YOU
+        if choiceStr == "ls": #Make a landscape
+            if self.isUniq(text, currCountry.children):
+                c = Landscape(text)
+                currCountry.tree.addTopLevelItem(c)
+        if choiceStr == "np":
+            if self.isUniq(text, currItem.children):
+                c = NotablePlace(text)
+        if choiceStr == "t":
+            if self.isUniq(text, currItem.children):
+                c = Town(text)
+        if choiceStr == "dw":
+            if self.isUniq(text, currItem.children):
+                c = Dwelling(text)
+        if choiceStr == "p":
+            if self.isUniq(text, currItem.children):
+                c = Person(text)
+        if choiceStr == "m":
+            if self.isUniq(text, currItem.children):
+                c = Monster(text)
+        if choiceStr == "i":
+            if self.isUniq(text, currItem.children):
+                c = Item(text)
+        try:
+            currItem.addChild(c)
+            currItem.childrenHelper.append(text)
+            currItem.children.append(c)
+            print(currItem.parent().children)
+        except: #Exception occurs on ls creation
+            pass
+        currCountry.childrenHelper.append(text)
+        currCountry.children.append(c)
+
     @QtCore.Slot()
     def createTreeWidget(self):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
@@ -172,8 +174,11 @@ class CountryNotebook(QtWidgets.QWidget):
     def deleteTreeWidget(self):
         try:
             currCountry = self.currCountrySelection()
+            print("1")
             currItem = currCountry.tree.currentItem() #Get current Widget Selected
+            print("2")
             root = currCountry.tree.invisibleRootItem()
+            print("3")
 
             if isinstance(currItem, type(Landscape(""))):
                 a = currCountry.childrenHelper.index(currItem.uName)
@@ -181,12 +186,21 @@ class CountryNotebook(QtWidgets.QWidget):
                 del currCountry.children[a]
             else:
                 a = currItem.parent().childrenHelper.index(currItem.uName)
+                print("4")
                 del currItem.parent().childrenHelper[a]
+                print("5")
                 del currItem.parent().children[a]
+                print("6")
             (currItem.parent() or root).removeChild(currItem)
             self.treeSelectionChanged()
         except:
             pass
+
+    def createTabFunc(self, text):
+        a = CountryTab(text, self)
+        self.currCountry = self.currCountrySelection()
+        self.notebook.addTab(a, text)
+        self.countries.append(a)
 
     @QtCore.Slot()
     def createTab(self):
@@ -194,10 +208,7 @@ class CountryNotebook(QtWidgets.QWidget):
         if text.replace(" ", "") is "":
             return
         if self.isUniq(text, self.countries):
-            a = CountryTab(text, self)
-            currCountry = self.currCountrySelection()
-            self.notebook.addTab(a, text)
-            self.countries.append(a)
+            self.createTabFunc(text)
 
     @QtCore.Slot()
     def deleteTab(self):
@@ -355,6 +366,7 @@ class MyWidget(QtWidgets.QWidget):
         ret = []
         ret.append(landscape.uName)
         ret.append("ls")
+        ret.append(landscape.climateInfo)
         ret.append(len(landscape.children))
         return ret
     def saveNotablePlace(self, np):
@@ -368,6 +380,7 @@ class MyWidget(QtWidgets.QWidget):
         ret.append(town.uName)
         ret.append("t")
         ret.append(len(town.children))
+        print(len(town.children))
         return ret
     def saveDwelling(self, dwelling):
         ret = []
@@ -400,96 +413,65 @@ class MyWidget(QtWidgets.QWidget):
             print("Nothing to save!")
             return
 # We will be parsing through each country to find landscapes.
+        self.parentSaveInfo = {}
         for eaCou in countries:
-            self.parentSaveInfo = {eaCou.uName : []}
+            self.parentSaveInfo[eaCou.uName] = []
             self.parentSaveInfo[eaCou.uName].append(self.saveCountry(eaCou))
-            # Example of a save would be {'America': [['Virginia', 0]]}
-            # The first piece (the key) is the country name, whereas the data is a list of lists.
-            # The number at the end of a list indicates how many lists after that are childed underneath it.
-            # The following list beyond that number is a new piece (whether that be a Dwelling or Country)
-            if len(eaCou.children) == 0:
-                #print("There are no landscapes in this country.")
-                pass
-    # And now each landscape to find towns/notable places
-            else:
-                for eaLand in eaCou.children:
-                    self.parentSaveInfo[eaCou.uName].append(self.saveLandscape(eaLand))
-                    if len(eaLand.children) == 0:
-                        #print("There are no children in this landscape.")
-                        pass
-        # And now each child of the landscape, to see if it's a notable place
-                    else:
-                        for eaTNP in eaLand.children:
-                            if isinstance(eaTNP, type(NotablePlace(""))):
-                                #print("This is a Notable Place!")
-                                self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaTNP))
-            # And now each child of the notable place to see if it has children.
-                                if len(eaTNP.children) == 0:
-                                    # print("There are no children in this Notable Place.")
-                                    pass
-                                else:
-                    # And now each child of the notable place to see if it has children.
-                                    for eaChil in eaTNP.children:
-                                        if isinstance(eaChil, type(Person(""))):
-                                            # print("There is a Person in this Notable place!")
-                                            self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaChil))
-                    # And now save the Person info.
-                                        elif isinstance(eaChil, type(Monster(""))):
-                                            # print("There is a Monster in this Notable place!")
-                                            self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaChil))
-                    # And now save the Monster info
-                                        elif isinstance(eaChil, type(Item(""))):
-                                            # print("There is an Item in this Notable place!")
-                                            self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaChil))
-                    # And now save the Item info
-        # And now each child of the landscape, to see if it's a town
-                            elif isinstance(eaTNP, type(Town(""))):
-                                # print("This is a town!")
-                                self.parentSaveInfo[eaCou.uName].append(self.saveTown(eaTNP))
-            # And now each child of the town to see if it has children
-                                if len(eaTNP.children) == 0:
-                                    # print("There are no children in this Town.")
-                                    pass
-                                for eaChil in eaTNP.children:
-                                    if isinstance(eaChil, type(Dwelling(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaChil))
-                                        if len(eaChil.children) == 0:
-                                            # print("There are no children in this Dwelling.")
-                                            pass
-                                        else:
-                                            for eaUnit in eaChil.children:
-                                                if isinstance(eaUnit, type(Person(""))):
-                                                    # print("There is a Person in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaUnit))
-                            # And now save the Person info.
-                                                elif isinstance(eaUnit, type(Monster(""))):
-                                                    # print("There is a Monster in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaUnit))
-                            # And now save the Monster info
-                                                elif isinstance(eaUnit, type(Item(""))):
-                                                    # print("There is an Item in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaUnit))
-                            # And now save the Item info
 
-                                    elif isinstance(eaChil, type(NotablePlace(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaChil))
-                                        if len(eaChil.children) == 0:
-                                            # print("There are no children in this NotablePlace")
-                                            pass
-                                        else:
-                                            for eaUnit in eaChil.children:
-                                                if isinstance(eaUnit, type(Person(""))):
-                                                    # print("There is a Person in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaUnit))
-                            # And now save the Person info.
-                                                elif isinstance(eaUnit, type(Monster(""))):
-                                                    # print("There is a Monster in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaUnit))
-                            # And now save the Monster info
-                                                elif isinstance(eaUnit, type(Item(""))):
-                                                    #  print("There is an Item in this Dwelling!")
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaUnit))
-                                # And now save the Item info
+    # And now each landscape to find towns/notable places
+            for eaLand in eaCou.children:
+                if isinstance(eaLand, type(Landscape(""))):
+                    self.parentSaveInfo[eaCou.uName].append(self.saveLandscape(eaLand))
+                    for eaTNP in eaLand.children:
+                        if isinstance(eaTNP, type(NotablePlace(""))):
+                            self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaTNP))
+
+                            for eaDPMI in eaTNP.children:
+                                    if isinstance(eaDPMI, type(Dwelling(""))):
+                                        self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaDPMI))
+                                        for eaPMI in eaDPMI.children:
+                                            if isinstance(eaPMI, type(Person(""))):
+                                                self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                            elif isinstance(eaPMI, type(Monster(""))):
+                                                self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                            elif isinstance(eaPMI, type(Item(""))):
+                                                self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
+
+                                    elif isinstance(eaDPMI, type(Person(""))):
+                                        self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaDPMI))
+                                    elif isinstance(eaDPMI, type(Monster(""))):
+                                        self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaDPMI))
+                                    elif isinstance(eaDPMI, type(Item(""))):
+                                        self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaDPMI))
+
+    # For the TOWNS in LANDSCAPES
+                        elif isinstance(eaTNP, type(Town(""))):
+                            self.parentSaveInfo[eaCou.uName].append(self.saveTown(eaTNP))
+
+                            for eaDNP in eaTNP.childern:
+    #For the DWELLINGS in TOWNS
+                                if isinstance(eaDNP, type(Dwelling(""))):
+                                    self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaDNP))
+
+                                    for eaPMI in eaDNP.children:
+                                        if isinstance(eaPMI, type(Person(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                        elif isinstance(eaPMI, type(Monster(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                        elif isinstance(eaPMI, type(Item(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
+
+    #For the NOTABLE PLACES in TOWNS
+                        elif isinstance(eaDNP, type(NotablePlace(""))):
+                                    self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaDNP))
+
+                                    for eaPMI in eaDNP.children:
+                                        if isinstance(eaPMI, type(Person(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                        elif isinstance(eaPMI, type(Monster(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                        elif isinstance(eaPMI, type(Item(""))):
+                                            self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
         print(self.parentSaveInfo)
 
     def parentLoadFunc(self):
@@ -553,6 +535,7 @@ class DescWindow(QtWidgets.QMainWindow):
         if self.isUniq(text, self.clas.climateInfo):
             self.w.climateChoice.listChoices.addItem(text)
             self.clas.climateInfo.append(text)
+            print(self.clas.climateInfo)
 
     @QtCore.Slot()
     def deleteClimate(self, item):
@@ -591,6 +574,7 @@ class DescWindow(QtWidgets.QMainWindow):
         if text.replace(" ", "") is "":
             return
         if self.clas.Type == "c":
+            print("It's a Country!")
             if self.isUniq(text, self.country.cNB.countries):
                 self.country.cNB.notebook.setTabText(self.CI, text)
                 self.setWindowTitle("Country - "+self.clas.uName)
@@ -631,8 +615,9 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.Type = "ls"
                 self.setWindowTitle("ls - "+self.country.uName+" -> "+clas.uName)
 
-                self.w.nameChanger.nameChangeEdit.setPlaceholderText(self.clas.uName)
-                self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
+                for text in self.clas.climateInfo:
+                    self.w.climateChoice.listChoices.addItem(text)
+
                 self.w.climateChoice.climateAdd.climateAddField.returnPressed.connect(self.climateSet)
                 self.w.climateChoice.listChoices.itemDoubleClicked.connect(self.deleteClimate)
 
@@ -640,29 +625,36 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.w = DescriptorClasses.NotablePlaceDesc(self.clas)
                 self.Type = "np"
                 self.setWindowTitle("np - "+self.country.uName+" -> "+clas.uName)
+
             elif clas.Type == "t":
                 self.w = DescriptorClasses.TownDesc(self.clas)
                 self.Type = "t"
                 self.setWindowTitle("t - "+self.country.uName+" -> "+clas.uName)
+
             elif clas.Type == "dw":
                 self.w = DescriptorClasses.DwellingDesc(self.clas)
                 self.Type = "dw"
                 self.setWindowTitle("dw - "+self.country.uName+" -> "+clas.uName)
+
             elif clas.Type == "p":
                 self.w = DescriptorClasses.PersonDesc(self.clas)
                 self.Type = "p"
                 self.setWindowTitle("p - "+self.country.uName+" -> "+clas.uName)
+
             elif clas.Type == "m":
                 self.w = DescriptorClasses.MonsterDesc(self.clas)
                 self.Type = "m"
                 self.setWindowTitle("m - "+self.country.uName+" -> "+clas.uName)
+
             elif clas.Type == "i":
                 self.w = DescriptorClasses.ItemDesc(self.clas)
                 self.Type = "i"
                 self.setWindowTitle("i - "+self.country.uName+" -> "+clas.uName)
 
-            self.cw = self.setCentralWidget(self.w)
-            self.uName = self.clas.uName
+        self.w.nameChanger.nameChangeEdit.setPlaceholderText(self.clas.uName)
+        self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
+        self.cw = self.setCentralWidget(self.w)
+        self.uName = self.clas.uName
 
         self.show()
 
