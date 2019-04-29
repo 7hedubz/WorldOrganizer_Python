@@ -54,6 +54,43 @@ class CountryNotebook(QtWidgets.QWidget):
                 self.featureCreateGroup.featureChoices.removeItem(1)
             except:
                 return
+                
+    def createTreeWidgetFunc(self, choiceStr, text, currCountry):
+        c = ""
+        if currCountry is None:
+            return #If there's no country break out! We can't make a feature with no home!
+        currItem = currCountry.tree.currentItem() #Get current Widget Selected
+        if text.replace(" ", "") is "":
+            return #The only thing in the name is spaces, NO FEATURE FOR YOU
+        if choiceStr == "ls": #Make a landscape
+            if self.isUniq(text, currCountry.children):
+                c = Landscape(text)
+                currCountry.tree.addTopLevelItem(c)
+        if choiceStr == "np":
+            if self.isUniq(text, currItem.children):
+                c = NotablePlace(text)
+        if choiceStr == "t":
+            if self.isUniq(text, currItem.children):
+                c = Town(text)
+        if choiceStr == "dw":
+            if self.isUniq(text, currItem.children):
+                c = Dwelling(text)
+        if choiceStr == "p":
+            if self.isUniq(text, currItem.children):
+                c = Person(text)
+        if choiceStr == "m":
+            if self.isUniq(text, currItem.children):
+                c = Monster(text)
+        if choiceStr == "i":
+            if self.isUniq(text, currItem.children):
+                c = Item(text)
+        try:
+            currItem.addChild(c)
+        except: #Exception occurs on ls creation
+            pass
+        currCountry.childrenHelper.append(text)
+        currCountry.children.append(c)
+        c.parentCountry = currCountry
 
     @QtCore.Slot()
     def tabBarDblClk(self, index):
@@ -130,41 +167,7 @@ class CountryNotebook(QtWidgets.QWidget):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
         text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
         currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
-        c = ""
-        if currCountry is None:
-            return #If there's no country break out! We can't make a feature with no home!
-        currItem = currCountry.tree.currentItem() #Get current Widget Selected
-        if text.replace(" ", "") is "":
-            return #The only thing in the name is spaces, NO FEATURE FOR YOU
-        if choiceStr == "ls": #Make a landscape
-            if self.isUniq(text, currCountry.children):
-                c = Landscape(text)
-                currCountry.tree.addTopLevelItem(c)
-        if choiceStr == "np":
-            if self.isUniq(text, currItem.children):
-                c = NotablePlace(text)
-        if choiceStr == "t":
-            if self.isUniq(text, currItem.children):
-                c = Town(text)
-        if choiceStr == "dw":
-            if self.isUniq(text, currItem.children):
-                c = Dwelling(text)
-        if choiceStr == "p":
-            if self.isUniq(text, currItem.children):
-                c = Person(text)
-        if choiceStr == "m":
-            if self.isUniq(text, currItem.children):
-                c = Monster(text)
-        if choiceStr == "i":
-            if self.isUniq(text, currItem.children):
-                c = Item(text)
-        try:
-            currItem.addChild(c)
-        except: #Exception occurs on ls creation
-            pass
-        currCountry.childrenHelper.append(text)
-        currCountry.children.append(c)
-        c.parentCountry = currCountry
+        self.createTreeWidgetFunc(choiceStr, text, currCountry)
 
     def deleteTreeWidget(self):
         try:
@@ -489,6 +492,8 @@ class MyWidget(QtWidgets.QWidget):
                                 # And now save the Item info
         print(self.parentSaveInfo)
 
+    def parentLoadFunc(self):
+        pass
 
     def __init__(self, parent=None):
         super().__init__()
