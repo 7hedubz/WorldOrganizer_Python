@@ -73,10 +73,8 @@ class CountryNotebook(QtWidgets.QWidget):
         currItem = currCountry.tree.currentItem()
 
         for ea in self.openDescWindows:
-            if currItem.Type == ea.Type:
-                if currItem.parentCountry == ea.country:
-                    if currItem.uName == ea.uName:
-                        return
+            if currItem.id == ea.id:
+                return
 
         a = DescWindow(currItem, currCountry)
         self.openDescWindows.append(a)
@@ -142,7 +140,7 @@ class CountryNotebook(QtWidgets.QWidget):
                             if eaChildID == parent:
                                 i = ls.childrenHelper.index(eaChildID)
                                 parentItem = ls.children[i]
-                                
+
         if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
         if text.replace(" ", "") is "":
@@ -662,6 +660,7 @@ class DescWindow(QtWidgets.QMainWindow):
             self.clas = self.country
             self.uName = self.clas.uName
             self.Type = "c"
+            self.id = self.clas.id
             self.setWindowTitle("Country - "+self.clas.uName)
         else:
             self.currItem = country.tree.currentItem()
@@ -711,6 +710,7 @@ class DescWindow(QtWidgets.QMainWindow):
         self.w.nameChanger.nameChangeEdit.returnPressed.connect(self.uNameChange)
         self.cw = self.setCentralWidget(self.w)
         self.uName = self.clas.uName
+        self.id = self.clas.id
 
         self.show()
 
