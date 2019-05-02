@@ -42,11 +42,19 @@ class CountryNotebook(QtWidgets.QWidget):
     def currCountrySelection(self):
         return self.notebook.currentWidget()
 
-    def isUniq(self, text, listToSrch):
-        for ea in listToSrch:
-            if text == ea.uName:
-                return False
-        return True
+    def isUniq(self, text, listToSrch, typ = None):
+        if typ == "ls":
+            for ea in listToSrch:
+                if ea.Type == "ls":
+                    if ea.uName == text:
+                        return False
+            else:
+                return True
+        else:
+            for ea in listToSrch:
+                if text == ea.uName:
+                    return False
+            return True
 
     def choicesReset(self):
         for i in range(999):
@@ -129,17 +137,12 @@ class CountryNotebook(QtWidgets.QWidget):
             parent = parent.id
         except:
             pass
-        if isinstance(parent, str):
-            for eaLsID in currCountry.childrenHelper:
-                if eaLsID == parent:
-                    i = currCountry.childrenHelper.index(eaLsID)
+
+        if itemID:
+            for eaItem in currCountry.childrenHelper:
+                if itemID == eaItem:
+                    i = index(currCountry.countryHelper(itemID))
                     parentItem = currCountry.children[i]
-                else:
-                    for ls in currCountry.children:
-                        for eaChildID in ls.childrenHelper:
-                            if eaChildID == parent:
-                                i = ls.childrenHelper.index(eaChildID)
-                                parentItem = ls.children[i]
 
         if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
@@ -147,44 +150,39 @@ class CountryNotebook(QtWidgets.QWidget):
             return #The only thing in the name is spaces, NO FEATURE FOR YOU
 
         if choiceStr == "ls": #Make a landscape
-            if self.isUniq(text, currCountry.children):
-                c = Landscape(text)
-                if climateInfo:
-                    c.climateInfo = climateInfo
-                currCountry.tree.addTopLevelItem(c)
+            if not self.isUniq(text, currCountry.children, typ="ls"):
+                return
+            c = Landscape(text)
+            if climateInfo:
+                c.climateInfo = climateInfo
+            currCountry.tree.addTopLevelItem(c)
 
-        elif self.isUniq(text, parentItem.children):
-            if choiceStr == "np":
-                    c = NotablePlace(text)
-            elif choiceStr == "t":
-                if self.isUniq(text, parentItem.children):
-                    c = Town(text)
-            elif choiceStr == "dw":
-                if self.isUniq(text, parentItem.children):
-                    c = Dwelling(text)
-            elif choiceStr == "p":
-                if self.isUniq(text, parentItem.children):
-                    c = Person(text)
-            elif choiceStr == "m":
-                if self.isUniq(text, parentItem.children):
-                    c = Monster(text)
-            elif choiceStr == "i":
-                if self.isUniq(text, parentItem.children):
-                    c = Item(text)
+        elif not self.isUniq(text, parentItem.children):
+            return
+        if choiceStr == "np":
+                c = NotablePlace(text)
+        elif choiceStr == "t":
+            if self.isUniq(text, parentItem.children):
+                c = Town(text)
+        elif choiceStr == "dw":
+            if self.isUniq(text, parentItem.children):
+                c = Dwelling(text)
+        elif choiceStr == "p":
+            if self.isUniq(text, parentItem.children):
+                c = Person(text)
+        elif choiceStr == "m":
+            if self.isUniq(text, parentItem.children):
+                c = Monster(text)
+        elif choiceStr == "i":
+            if self.isUniq(text, parentItem.children):
+                c = Item(text)
 
-        if itemID:
-            c.id = itemID
-        try:
+        if choiceStr != "ls":
             parentItem.addChild(c)
             parentItem.childrenHelper.append(c.id)
             parentItem.children.append(c)
-        except: #Exception occurs on ls creation
-            if choiceStr == "ls":
-                try:
-                    currCountry.childrenHelper.append(c.id)
-                    currCountry.children.append(c)
-                except:
-                    pass
+        currCountry.childrenHelper.append(c.id)
+        currCountry.children.append(c)
 
 
     def createTreeWidget(self):
@@ -400,38 +398,36 @@ class MyWidget(QtWidgets.QWidget):
         ret = []
         ret.append(town.uName) #0
         ret.append("t") #1
-        ret.append(len(town.children)) #2
-        ret.append(town.id) #3
-        ret.append(town.parent().id) #4
+        ret.append(town.id) #2
+        ret.append(town.parent().id) #3
         return ret
     def saveDwelling(self, dwelling):
         ret = []
-        ret.append(dwelling.uName)
-        ret.append("dw")
-        ret.append(len(dwelling.children))
-        ret.append(dwelling.id)
-        ret.append(dwelling.parent().id)
+        ret.append(dwelling.uName) #0
+        ret.append("dw") #1
+        ret.append(dwelling.id) #2
+        ret.append(dwelling.parent().id) #3
         return ret
     def savePerson(self, person):
         ret = []
-        ret.append(person.uName)
-        ret.append("p")
-        ret.append(person.id)
-        ret.append(person.parent().id)
+        ret.append(person.uName) #0
+        ret.append("p") #1
+        ret.append(person.id) #2
+        ret.append(person.parent().id) #3
         return ret
     def saveMonster(self, monster):
         ret = []
-        ret.append(monster.uName)
-        ret.append("m")
-        ret.append(monster.id)
-        ret.append(monster.parent().id)
+        ret.append(monster.uName) #0
+        ret.append("m") #1
+        ret.append(monster.id) #2
+        ret.append(monster.parent().id) #3
         return ret
     def saveItem(self, item):
         ret = []
-        ret.append(item.uName)
-        ret.append("i")
-        ret.append(item.id)
-        ret.append(item.parent().id)
+        ret.append(item.uName) #0
+        ret.append("i") #1
+        ret.append(item.id) #2
+        ret.append(item.parent().id) #3
         return ret
 
     def parentSaveFunc(self):
@@ -501,7 +497,7 @@ class MyWidget(QtWidgets.QWidget):
                                                 elif isinstance(eaPMI, type(Item(""))):
                                                     self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
         print(self.parentSaveInfo)
-        with open("data_file2.json", "w") as write_file:
+        with open("data_file1.json", "w") as write_file:
             json.dump(self.parentSaveInfo, write_file, indent=4)
             print("Saved!")
 
@@ -513,10 +509,18 @@ class MyWidget(QtWidgets.QWidget):
     def loadNotablePlace(self, np, country):
         self.notebook.createTreeWidgetFunc(np[1], np[0], country, parent = np[3], itemID = np[2])
     def loadTown(self, t, country):
-        self.notebook.createTreeWidgetFunc(t[1], t[0], country, parent = t[4], itemID = t[3])
+        self.notebook.createTreeWidgetFunc(t[1], t[0], country, parent = t[3], itemID = t[2])
+    def loadDwelling(self, dw, country):
+        self.notebook.createTreeWidgetFunc(dw[1], dw[0], country, parent = dw[3], itemID = dw[2])
+    def loadPerson(self, p, country):
+        self.notebook.createTreeWidgetFunc(p[1], p[0], country, parent = p[3], itemID = p[2])
+    def loadMonster(self, m, country):
+        self.notebook.createTreeWidgetFunc(m[1], m[0], country, parent = m[3], itemID = m[2])
+    def loadItem(self, i, country):
+        self.notebook.createTreeWidgetFunc(i[1], i[0], country, parent = i[3], itemID = i[2])
 
     def parentLoadFunc(self):
-        with open("data_file2.json", "r") as read_file:
+        with open("data_file1.json", "r") as read_file:
             data = json.load(read_file)
         if len(self.notebook.countries) > 0:
             return
@@ -531,6 +535,14 @@ class MyWidget(QtWidgets.QWidget):
                     self.loadNotablePlace(item, country)
                 elif item[1] =="t":
                     self.loadTown(item, country)
+                elif item[1] =="dw":
+                    self.loadDwelling(item, country)
+                elif item[1] =="p":
+                    self.loadPerson(item, country)
+                elif item[1] =="m":
+                    self.loadMonster(item, country)
+                elif item[1] =="i":
+                    self.loadItem(item, country)
 
 
     def __init__(self, parent=None):
