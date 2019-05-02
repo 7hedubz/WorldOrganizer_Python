@@ -132,17 +132,13 @@ class CountryNotebook(QtWidgets.QWidget):
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
 
     def createTreeWidgetFunc(self, choiceStr, text, currCountry, parent, climateInfo = [], itemID = None):
-        try:
+        if isinstance(parent, str):
+            for ea in currCountry.childrenHelper:
+                if ea == parent:
+                    i = currCountry.childrenHelper.index(ea)
+                    parentItem = currCountry.children[i])
+        elif parent is not None:
             parentItem = parent
-            parent = parent.id
-        except:
-            pass
-
-        if itemID:
-            for eaItem in currCountry.childrenHelper:
-                if itemID == eaItem:
-                    i = index(currCountry.countryHelper(itemID))
-                    parentItem = currCountry.children[i]
 
         if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
@@ -152,6 +148,7 @@ class CountryNotebook(QtWidgets.QWidget):
         if choiceStr == "ls": #Make a landscape
             if not self.isUniq(text, currCountry.children, typ="ls"):
                 return
+            print("Making LS")
             c = Landscape(text)
             if climateInfo:
                 c.climateInfo = climateInfo
@@ -177,6 +174,12 @@ class CountryNotebook(QtWidgets.QWidget):
             if self.isUniq(text, parentItem.children):
                 c = Item(text)
 
+        if itemID is None:
+            pass
+        else:
+            c.id = itemID
+            print("setting ID")
+
         if choiceStr != "ls":
             parentItem.addChild(c)
             parentItem.childrenHelper.append(c.id)
@@ -189,7 +192,7 @@ class CountryNotebook(QtWidgets.QWidget):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
         text = self.featureCreateGroup.featureNameField.text() #Get's the text for the features name
         currCountry = self.currCountrySelection() #Get's the currently selected country so that we make the widget in the right country
-        self.createTreeWidgetFunc(choiceStr, text, currCountry, currCountry.tree.currentItem())
+        self.createTreeWidgetFunc(choiceStr=choiceStr, text=text, currCountry=currCountry, parent=currCountry.tree.currentItem())
 
     def deleteTreeWidget(self):
         try:
