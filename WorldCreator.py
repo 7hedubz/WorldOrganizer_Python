@@ -39,6 +39,10 @@ class AddFeature(QtWidgets.QWidget):
 
 class CountryNotebook(QtWidgets.QWidget):
 
+    def getID(self):
+        self.idPlace += 1
+        return self.idPlace -1
+
     def currCountrySelection(self):
         return self.notebook.currentWidget()
 
@@ -132,11 +136,11 @@ class CountryNotebook(QtWidgets.QWidget):
         currItem = currCountry.tree.currentItem() #Get current Widget Selected
 
     def createTreeWidgetFunc(self, choiceStr, text, currCountry, parent, climateInfo = [], itemID = None):
-        if isinstance(parent, str):
+        if isinstance(parent, int):
             for ea in currCountry.childrenHelper:
                 if ea == parent:
                     i = currCountry.childrenHelper.index(ea)
-                    parentItem = currCountry.children[i])
+                    parentItem = currCountry.children[i]
         elif parent is not None:
             parentItem = parent
 
@@ -148,7 +152,6 @@ class CountryNotebook(QtWidgets.QWidget):
         if choiceStr == "ls": #Make a landscape
             if not self.isUniq(text, currCountry.children, typ="ls"):
                 return
-            print("Making LS")
             c = Landscape(text)
             if climateInfo:
                 c.climateInfo = climateInfo
@@ -175,10 +178,9 @@ class CountryNotebook(QtWidgets.QWidget):
                 c = Item(text)
 
         if itemID is None:
-            pass
+            c.id = self.getID()
         else:
             c.id = itemID
-            print("setting ID")
 
         if choiceStr != "ls":
             parentItem.addChild(c)
@@ -186,7 +188,6 @@ class CountryNotebook(QtWidgets.QWidget):
             parentItem.children.append(c)
         currCountry.childrenHelper.append(c.id)
         currCountry.children.append(c)
-
 
     def createTreeWidget(self):
         choiceStr = self.featureCreateGroup.featureChoices.currentData() #Get's the string attached to the current choice eg. ls/np
@@ -221,14 +222,12 @@ class CountryNotebook(QtWidgets.QWidget):
         self.countries.append(a)
         return a
 
-
     def createTab(self):
         text = self.countryCreateGroup.countryNameField.text()
         if text.replace(" ", "") is "":
             return
         if self.isUniq(text, self.countries):
             self.createTabFunc(text)
-
 
     def deleteTab(self):
         currCountry = self.currCountrySelection()
@@ -246,6 +245,7 @@ class CountryNotebook(QtWidgets.QWidget):
         self.countries = []
         self.currentTab = "" #Placeholder for future tab classes.
         self.openDescWindows = []
+        self.idPlace = 0
         self.notebook = QtWidgets.QTabWidget()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
@@ -296,7 +296,7 @@ class treeObject(QtWidgets.QTreeWidgetItem):
         super().__init__()
 
         self.uName = ""
-        self.id = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        self.id = ''
         self.detInfo = ""
         self.children = []
         self.Type = ""
@@ -436,69 +436,70 @@ class MyWidget(QtWidgets.QWidget):
     def parentSaveFunc(self):
         print("Trying to save")
         countries = self.notebook.countries
+        idSpot = self.notebook.idPlace
         if len(countries) == 0:
             print("Nothing to save!")
             return
 # We will be parsing through each country to find landscapes.
         self.parentSaveInfo = {}
         for eaCou in countries:
-            self.parentSaveInfo[eaCou.uName] = []
-            self.parentSaveInfo[eaCou.uName].append(self.saveCountry(eaCou))
+            self.parentSaveInfo[idSpot] = []
+            self.parentSaveInfo[idSpot].append(self.saveCountry(eaCou))
 
     # And now each landscape to find towns/notable places
             for eaLand in eaCou.children:
                 if isinstance(eaLand, type(Landscape(""))):
-                    self.parentSaveInfo[eaCou.uName].append(self.saveLandscape(eaLand))
+                    self.parentSaveInfo[idSpot].append(self.saveLandscape(eaLand))
                     for eaTNP in eaLand.children:
                         if isinstance(eaTNP, type(NotablePlace(""))):
-                            self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaTNP))
+                            self.parentSaveInfo[idSpot].append(self.saveNotablePlace(eaTNP))
 
                             for eaDPMI in eaTNP.children:
                                     if isinstance(eaDPMI, type(Dwelling(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaDPMI))
+                                        self.parentSaveInfo[idSpot].append(self.saveDwelling(eaDPMI))
                                         for eaPMI in eaDPMI.children:
                                             if isinstance(eaPMI, type(Person(""))):
-                                                self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                                self.parentSaveInfo[idSpot].append(self.savePerson(eaPMI))
                                             elif isinstance(eaPMI, type(Monster(""))):
-                                                self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                                self.parentSaveInfo[idSpot].append(self.saveMonster(eaPMI))
                                             elif isinstance(eaPMI, type(Item(""))):
-                                                self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
+                                                self.parentSaveInfo[idSpot].append(self.saveItem(eaPMI))
 
                                     elif isinstance(eaDPMI, type(Person(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaDPMI))
+                                        self.parentSaveInfo[idSpot].append(self.savePerson(eaDPMI))
                                     elif isinstance(eaDPMI, type(Monster(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaDPMI))
+                                        self.parentSaveInfo[idSpot].append(self.saveMonster(eaDPMI))
                                     elif isinstance(eaDPMI, type(Item(""))):
-                                        self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaDPMI))
+                                        self.parentSaveInfo[idSpot].append(self.saveItem(eaDPMI))
 
     # For the TOWNS in LANDSCAPES
                         elif isinstance(eaTNP, type(Town(""))):
-                            self.parentSaveInfo[eaCou.uName].append(self.saveTown(eaTNP))
+                            self.parentSaveInfo[idSpot].append(self.saveTown(eaTNP))
 
                             for eaDNP in eaTNP.children:
     #For the DWELLINGS in TOWNS
                                 if isinstance(eaDNP, type(Dwelling(""))):
-                                    self.parentSaveInfo[eaCou.uName].append(self.saveDwelling(eaDNP))
+                                    self.parentSaveInfo[idSpot].append(self.saveDwelling(eaDNP))
 
                                     for eaPMI in eaDNP.children:
                                         if isinstance(eaPMI, type(Person(""))):
-                                            self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                            self.parentSaveInfo[idSpot].append(self.savePerson(eaPMI))
                                         elif isinstance(eaPMI, type(Monster(""))):
-                                            self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                            self.parentSaveInfo[idSpot].append(self.saveMonster(eaPMI))
                                         elif isinstance(eaPMI, type(Item(""))):
-                                            self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
+                                            self.parentSaveInfo[idSpot].append(self.saveItem(eaPMI))
 
     #For the NOTABLE PLACES in TOWNS
                                 elif isinstance(eaDNP, type(NotablePlace(""))):
-                                            self.parentSaveInfo[eaCou.uName].append(self.saveNotablePlace(eaDNP))
+                                            self.parentSaveInfo[idSpot].append(self.saveNotablePlace(eaDNP))
 
                                             for eaPMI in eaDNP.children:
                                                 if isinstance(eaPMI, type(Person(""))):
-                                                    self.parentSaveInfo[eaCou.uName].append(self.savePerson(eaPMI))
+                                                    self.parentSaveInfo[idSpot].append(self.savePerson(eaPMI))
                                                 elif isinstance(eaPMI, type(Monster(""))):
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveMonster(eaPMI))
+                                                    self.parentSaveInfo[idSpot].append(self.saveMonster(eaPMI))
                                                 elif isinstance(eaPMI, type(Item(""))):
-                                                    self.parentSaveInfo[eaCou.uName].append(self.saveItem(eaPMI))
+                                                    self.parentSaveInfo[idSpot].append(self.saveItem(eaPMI))
         print(self.parentSaveInfo)
         with open("data_file1.json", "w") as write_file:
             json.dump(self.parentSaveInfo, write_file, indent=4)
@@ -528,7 +529,9 @@ class MyWidget(QtWidgets.QWidget):
         if len(self.notebook.countries) > 0:
             return
         for key, value in data.items():
-            self.fullList = value
+            if int(key) > int(self.idSpot):
+                self.idSpot = int(key)
+
             for item in value:
                 if item[1] == "c":
                     country = self.loadCountry(item[0])
@@ -546,11 +549,12 @@ class MyWidget(QtWidgets.QWidget):
                     self.loadMonster(item, country)
                 elif item[1] =="i":
                     self.loadItem(item, country)
-
+        self.notebook.idPlace = int(self.idSpot)
 
     def __init__(self, parent=None):
         super().__init__()
 
+        self.idSpot = 0
         self.notebook = CountryNotebook()
         self.middleLayout = QtWidgets.QVBoxLayout()
         self.middleLayout.addWidget(self.notebook)
