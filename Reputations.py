@@ -1,9 +1,13 @@
-from PySide2 import QtGui, QtCore, QtWidgets
+    def isUniq(self, text, searchAgainst):
+        if isinstance(searchAgainst, type(list))
+        for ea in listToSrch:
+            if text == ea:
+                return False
+        return True
 
-class Reputation():
-    def __init__(self):
-        pass
+def createFaction(factionName)
+    return faction(factionName)
 
-class MainReputationWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
+
+class faction():
+    pass

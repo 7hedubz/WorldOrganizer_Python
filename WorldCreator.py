@@ -1,4 +1,5 @@
-import sys, json, DescriptorClasses, Reputations, random, string
+import sys, json, DescriptorClasses
+#import Reputations as rep
 from PySide2 import QtGui, QtCore, QtWidgets
 
 class AddCountry(QtWidgets.QWidget):
