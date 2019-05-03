@@ -10,4 +10,4 @@ def createFaction(factionName)
 
 
 class faction():
-    pass
+    def __init__(self)
