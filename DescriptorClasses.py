@@ -27,28 +27,43 @@ class ClimateChoices(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 class NameChange(QtWidgets.QWidget):
-        def __init__(self):
-            super().__init__()
+	def __init__(self):
+		super().__init__()
 
-            self.nameChangeLabel = QtWidgets.QLabel("Name : ")
-            self.nameChangeEdit = QtWidgets.QLineEdit()
+		self.nameChangeLabel = QtWidgets.QLabel("Name : ")
+		self.nameChangeEdit = QtWidgets.QLineEdit()
 
-            self.layout = QtWidgets.QHBoxLayout()
-            self.layout.addWidget(self.nameChangeLabel)
-            self.layout.addWidget(self.nameChangeEdit)
-            self.layout.addSpacing(175)
+		self.layout = QtWidgets.QHBoxLayout()
+		self.layout.addWidget(self.nameChangeLabel)
+		self.layout.addWidget(self.nameChangeEdit)
+		#self.layout.addSpacing(175)
 
-            self.setLayout(self.layout)
+		self.setLayout(self.layout)
 
-
+class genericDesc(QtWidgets.QWidget):
+    def __init__(self):
+       super().__init__()
+       
+       self.genDesc_QLabel = QtWidgets.QLabel("Description")
+       self.genDesc_QPlainTextEdit = QtWidgets.QPlainTextEdit()
+       
+       self.layout = QtWidgets.QHBoxLayout()
+       self.layout.addWidget(self.genDesc_QLabel)
+       self.layout.addWidget(self.genDesc_QPlainTextEdit)
+       
+       self.setLayout(self.layout)
+       
+       
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 class MasterDesc(QtWidgets.QWidget):
         def __init__(self, flags="WA_DeleteOnClose()"):
             super().__init__()
             self.nameChanger = NameChange()
+            self.genDes = genericDesc()
 
             self.layout = QtWidgets.QVBoxLayout()
             self.layout.addWidget(self.nameChanger)
+            self.layout.addWidget(self.genDes)
             self.setLayout(self.layout)
 
 class CountryDesc(MasterDesc):
