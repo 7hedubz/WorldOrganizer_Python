@@ -7,7 +7,7 @@ pip install PySide2
 
 Troubleshooting can be found here - https://packaging.python.org/tutorials/installing-packages/
 
-While I'm fairly certain in it's current state it's workable, I'll regularly be adding new features as I see fit. This will likely break most saves considering how I'm saving the content.
+While I'm fairly certain in it's current state it's workable.
 
 As for a few acknowledgements;
 My older brother ChaoticSeven who got me into DMing and when he heard about this tool he pushed me and pushed me into finishing it, or at least getting it to somewhere he could play around with it. 
