@@ -33,4 +33,6 @@ The relationship system is last, you can add a relationship from one feature/cou
 
 Select the relationship from the list in the Show Relationships window and then you'll be able to change a description of the relationship to the right. Again, it remembers as the contents are changed. You still have to save the file in order for them to be loaded. 
 
+You can double click any relationship to open up the description-window for that feature/country as well (provided it's not already open)
+
 I think that's about it! If there is any confusion you can email me at 7heDubz@gmail.com, you can also reach me there with any errors/bugs you find so I might try to fix them. I would appreciate as much information about the issue as possible, including a screenshot of the error code (if there was one)
