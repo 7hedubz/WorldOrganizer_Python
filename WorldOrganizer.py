@@ -229,7 +229,7 @@ class CountryNotebook(QtWidgets.QWidget):
         
         if currCountry is None:
             return #If there's no country break out! We can't make a feature with no home!
-        if text.replace(" ", "") is "":
+        if text.replace(" ", "") == "":
             return #The only thing in the name is spaces, NO FEATURE FOR YOU
 
         if choiceStr == "ls": #Make a landscape
@@ -344,7 +344,7 @@ class CountryNotebook(QtWidgets.QWidget):
 
     def createTab(self):
         text = self.countryCreateGroup.countryName_QLineEdit.text()
-        if text.replace(" ", "") is "":
+        if text.replace(" ", "") == "":
             return
         if self.isUniq(text, self.countries):
             self.createTabFunc(text)
@@ -970,7 +970,7 @@ class DescWindow(QtWidgets.QMainWindow):
 
     def climateSet(self):
         text = self.descW.climateChoice.climateAdd.climateAddField.text()
-        if text.replace(" ", "") is "":
+        if text.replace(" ", "") == "":
             return
         if self.isUniq(text, self.clas.climateInfo):
             self.descW.climateChoice.listChoices.addItem(text)
@@ -1011,7 +1011,7 @@ class DescWindow(QtWidgets.QMainWindow):
               
     def uNameChange(self):
         text = self.descW.nameChanger.nameChangeEdit.text()
-        if text.replace(" ", "") is "":
+        if text.replace(" ", "") == "":
             return
         if self.clas.type == "c":
             #print("It's a Country!")
@@ -1025,7 +1025,7 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.setWindowTitle(self.clas.type+" -> "+self.country.uName+text)
                 self.clas.uName = text
         else:
-            if self.isUniq(text, self.currItem.parent().children):
+            if self.isUniq(text, self.clas.parent().children):
                 self.clas.setText(0, text)
                 self.setWindowTitle(self.clas.type+" -> "+self.country.uName+text)
                 self.clas.uName = text
