@@ -6,6 +6,10 @@ VERSION_CONTROL = "World Creator Files (*.wc1)"
 
 #Class for the button and text field to add a button. 
 #*** later to be changed into the user being able to hit enter and create their country. 
+# MainWindow contains AddCountry & AddFeature & *CountryNotebook* widgets
+# CountryNotebook contains CountryTab
+# CountryTab contains treeObject
+# CountryTab & treeObject contains INFORMATION for use by the DescWindow class to create a window description.
 
 class AddCountry(QtWidgets.QWidget):
 
