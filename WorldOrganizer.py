@@ -196,12 +196,12 @@ class CountryNotebook(QtWidgets.QWidget):
             for cRel in country.saveRels: # 2
                 for eaCountry in self.countries: # 3
                     if eaCountry.pos == cRel[0]:
-                        print(cRel)
+                        print("Loaded Rel to",cRel[0])
                         country.rels.append(Rela.Target(eaCountry, relDesc = cRel[1]))
                 for eaCiC in self.countries: # 4
                     for eaTWiC in eaCiC.ALLchildren: # 5
                         if eaTWiC.pos == cRel[0]:
-                            print(cRel)
+                            print("Loaded Rel to",cRel[0])
                             country.rels.append(Rela.Target(eaTWiC, relDesc = cRel[1]))
                             
                             
@@ -209,12 +209,12 @@ class CountryNotebook(QtWidgets.QWidget):
                 for tRel in eTWidg.saveRels: # 2
                     for eachCountry in self.countries: # 3
                         if eachCountry.pos == tRel[0]:
-                            print(tRel)
+                            print("Loaded Rel to",tRel[0])
                             eTWidg.rels.append(Rela.Target(eachCountry, relDesc = tRel[1]))
                     for evCou in self.countries: # 4
                         for eaTWid in evCou.ALLchildren: # 5
                             if eaTWid.pos == tRel[0]:
-                                print(tRel)
+                                print("Loaded Rel to",tRel[0])
                                 eTWidg.rels.append(Rela.Target(eaTWid, relDesc = tRel[1]))
 
     def createTreeWidgetFunc(self, choiceStr, text, currCountry, parent, climateInfo = [], detail="", relations = None, imageData = ("", False)):
@@ -1147,7 +1147,7 @@ class DescWindow(QtWidgets.QMainWindow):
         self.descW.genDes.genDesc_QPlainTextEdit.textChanged.connect(self.genDesc_SavetoVar)
 
 
-        self.cw = imLazy(self.descW)
+        self.cw = pictureWid(self.descW)
         self.setCentralWidget(self.cw)
         self.uName = self.clas.uName
         self.pos = self.clas.pos
@@ -1160,7 +1160,7 @@ class DescWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-class imLazy(QtWidgets.QWidget):
+class pictureWid(QtWidgets.QWidget):
     def __init__(self, descW):
         super().__init__()
 
