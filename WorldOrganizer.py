@@ -49,6 +49,11 @@ class AddFeature(QtWidgets.QWidget):
 
 class CountryNotebook(QtWidgets.QWidget):
 
+    def moveTreeWidget(self):
+        #currItem = self.tree.currentItem()
+        #print("test complete")
+        pass
+
     def selfDestruct(self):
         for ea in self.countries:
             ea.selfDestruct()
@@ -56,6 +61,7 @@ class CountryNotebook(QtWidgets.QWidget):
 
     def currCountrySelection(self):
         return self.notebook.currentWidget()
+        pass
 
     def isUniq(self, text, listToSrch, typ = None):
         if typ == "ls":
@@ -117,6 +123,40 @@ class CountryNotebook(QtWidgets.QWidget):
         except:
             self.choicesReset()
 
+    def connectionSetupMoveORDesc(self, oldSelection, newSelection, switching):
+        #Disconnects the double click for opening the descwindow (need to rename those functions later)
+        try:
+            if switching:
+                #If we are switching I need to disconnect the previous double click connections. 
+                if self.doubleClickToMove: #We changed to move from desc
+                    try:
+                        oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
+                        self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                    except:
+                        pass
+                elif not self.doubleClickToMove: #We changed from desc to move 
+                    try:
+                        #Right here need to be the disconnections for tabs and treewidgetitems
+                        #for the movement connections.
+                        pass
+                    except:
+                        pass
+
+            if self.doubleClickToMove == False:
+                oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
+                self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+            else:
+                pass #make disconnections to double click to move function.
+        except:
+            pass
+
+        if self.doubleClickToMove: #We are moving
+            #Make connections to moving functions for tab and treewidgetitems
+            pass
+        elif not self.doubleClickToMove: #We are opening desc windows
+            self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
+            self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+
     def changeCountrySelection(self):
         self.choicesReset()
         try:
@@ -124,13 +164,12 @@ class CountryNotebook(QtWidgets.QWidget):
             self.currentTab = self.currCountrySelection()
             try:
                 oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
-                oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
-                self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                oldSelection.tree.itemEntered.disconnect(self.moveTreeWidget)
             except:
                 pass
             self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
-            self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
-            self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+            self.currentTab.tree.itemEntered.connect(self.moveTreeWidget)
+            self.connectionSetupMoveORDesc(oldSelection, self.currentTab, False)
         except:
             pass
 
@@ -389,6 +428,7 @@ class CountryNotebook(QtWidgets.QWidget):
         self.currentTab = "" #Placeholder for future tab classes.
         self.openDescWindows = []
         self.openRelWindows = []
+        self.doubleClickToMove = False
         self.notebook = QtWidgets.QTabWidget()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
@@ -727,16 +767,22 @@ class MyWidget(QtWidgets.QWidget):
         return a 
     def loadLandscape(self, ls, country):
         self.notebook.createTreeWidgetFunc(ls[1], ls[0], country, parent = None, climateInfo = ls[2], detail=ls[3], relations = ls[4], imageData = ls[5])
+        pass
     def loadNotablePlace(self, np, country):
         self.notebook.createTreeWidgetFunc(np[1], np[0], country, parent = np[2], detail=np[3], relations = np[4], imageData = np[5])
+        pass
     def loadTown(self, t, country):
         self.notebook.createTreeWidgetFunc(t[1], t[0], country, parent = t[2], detail=t[3], relations = t[4], imageData = t[5])
+        pass
     def loadDwelling(self, dw, country):
         self.notebook.createTreeWidgetFunc(dw[1], dw[0], country, parent = dw[2], detail=dw[3], relations = dw[4], imageData = dw[5])
+        pass
     def loadPerson(self, p, country):
         self.notebook.createTreeWidgetFunc(p[1], p[0], country, parent = p[2], detail=p[3], relations = p[4], imageData = p[5])
+        pass
     def loadMonster(self, m, country):
         self.notebook.createTreeWidgetFunc(m[1], m[0], country, parent = m[2], detail=m[3], relations = m[4], imageData = m[5])
+        pass
 
     def parentLoadFunc(self, filePath = "", dialog = True):
         self.loadAssist = -1
@@ -832,8 +878,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deleteCountryAction = self.deleteMenu.addAction("Delete Country", self.myWidgetVar.notebook.deleteTab)
         self.deleteFeatureAction = self.deleteMenu.addAction("Delete Feature", self.myWidgetVar.notebook.deleteTreeWidget)
 
+        self.editMenu = QtWidgets.QMenu("Edit")
+        #self.moveWidgetAction = self.editMenu.addAction("Move Widget", THIS NEEDS TO BE SOMETHING TO SWAP DOUBLE CLICK FUNCTIONALITY)
+
         self.parentMenu.addMenu(self.fileMenu)
         self.parentMenu.addMenu(self.deleteMenu)
+        self.parentMenu.addMenu(self.editMenu)
 
 
         self.setCentralWidget(self.myWidgetVar)
