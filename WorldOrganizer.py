@@ -49,7 +49,16 @@ class AddFeature(QtWidgets.QWidget):
 
 class CountryNotebook(QtWidgets.QWidget):
 
-    def moveTreeWidget(self):
+    def changeSwitching(self):
+        self.connectionSetup(True)
+        self.doubleClickToMove = not self.doubleClickToMove
+
+    def moveTreeItem(self):
+        #currItem = self.tree.currentItem()
+        #print("test complete")
+        pass
+    
+    def moveCountry(self):
         #currItem = self.tree.currentItem()
         #print("test complete")
         pass
@@ -123,55 +132,64 @@ class CountryNotebook(QtWidgets.QWidget):
         except:
             self.choicesReset()
 
-    def connectionSetupMoveORDesc(self, oldSelection, newSelection, switching):
+    def connectionSetup(self, switching):
         #Disconnects the double click for opening the descwindow (need to rename those functions later)
-        try:
-            if switching:
-                #If we are switching I need to disconnect the previous double click connections. 
-                if self.doubleClickToMove: #We changed to move from desc
-                    try:
-                        oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
-                        self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
-                    except:
-                        pass
-                elif not self.doubleClickToMove: #We changed from desc to move 
-                    try:
-                        #Right here need to be the disconnections for tabs and treewidgetitems
-                        #for the movement connections.
-                        pass
-                    except:
-                        pass
+        oldSelection = self.currentTab
+        self.currentTab = self.currCountrySelection()
 
-            if self.doubleClickToMove == False:
-                oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
-                self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
-            else:
-                pass #make disconnections to double click to move function.
-        except:
-            pass
-
+        if switching: #If we are switching I need to disconnect the previous double click connections. 
+            if self.doubleClickToMove: #We were opening windows, now we are moving.
+                try:
+                    oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
+                    self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                except:
+                    pass
+                try:
+                    oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
+                    self.notebook.tabBarDoubleClicked.connect(self.moveCountry)
+                    return
+                except:
+                    pass
+            if not self.doubleClickToMove: #We were moving, now we are opening windows. 
+                try:
+                    oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
+                    self.notebook.tabBarDoubleClicked.disconnect(self.moveCountry)
+                except:
+                    pass
+                try:
+                    oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
+                    self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+                    return
+                except:
+                    pass
+      
         if self.doubleClickToMove: #We are moving
-            #Make connections to moving functions for tab and treewidgetitems
-            pass
-        elif not self.doubleClickToMove: #We are opening desc windows
-            self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
-            self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
-
-    def changeCountrySelection(self):
-        self.choicesReset()
-        try:
-            oldSelection = self.currentTab
-            self.currentTab = self.currCountrySelection()
             try:
-                oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
-                oldSelection.tree.itemEntered.disconnect(self.moveTreeWidget)
+                oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
+                self.notebook.tabBarDoubleClicked.disconnect(self.moveCountry)
             except:
                 pass
-            self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
-            self.currentTab.tree.itemEntered.connect(self.moveTreeWidget)
-            self.connectionSetupMoveORDesc(oldSelection, self.currentTab, False)
-        except:
-            pass
+            try:
+                oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
+                self.notebook.tabBarDoubleClicked.connect(self.moveCountry)
+            except:
+                pass
+        elif not self.doubleClickToMove: #We are opening desc windows
+            try:
+                self.currentTab.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
+                self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+            except:
+                pass
+            try:
+                self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
+                self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+            except:
+                pass
+    
+    def changeCountrySelection(self):
+        self.choicesReset()
+        self.connectionSetup(False)
+        print("Called connectionSetup Func with False")
 
     def updatePos(self):
         currCountry = self.currCountrySelection()
@@ -442,7 +460,6 @@ class CountryNotebook(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
-        #self.Sender(in this case the button WITHIN another class).SIGNAL.connect(func)
         self.countryCreateGroup.countryCreate_QPushButton.released.connect(self.createTab)
         self.featureCreateGroup.featureCreateButton.released.connect(self.createTreeWidget)
         self.notebook.currentChanged.connect(self.changeCountrySelection)
@@ -864,10 +881,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
         self.myWidgetVar = MyWidget()
+        self.setWindowTitle("~ 7heDubz's World Organizer ~ ")
 
         
         self.setGeometry(300, 300, 300, 600)
-        self.setMaximumSize(500, 800) #x, y
+        self.setMaximumSize(1000, 1500) #x, y
 
         self.parentMenu = self.menuBar()
         self.fileMenu = QtWidgets.QMenu("File")
@@ -879,7 +897,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deleteFeatureAction = self.deleteMenu.addAction("Delete Feature", self.myWidgetVar.notebook.deleteTreeWidget)
 
         self.editMenu = QtWidgets.QMenu("Edit")
-        #self.moveWidgetAction = self.editMenu.addAction("Move Widget", THIS NEEDS TO BE SOMETHING TO SWAP DOUBLE CLICK FUNCTIONALITY)
+        self.moveWidgetAction = self.editMenu.addAction("Move / Open Item", self.myWidgetVar.notebook.changeSwitching)
 
         self.parentMenu.addMenu(self.fileMenu)
         self.parentMenu.addMenu(self.deleteMenu)
@@ -931,6 +949,7 @@ class RelationShowWindow(QtWidgets.QMainWindow):
         self.clas = clas
         self.removeVar = removeVar
         self.notebook = notebook
+        self.setWindowTitle("Relationships")
         
         self.relWin = Rela.ShowWindow(clas)
         self.cw = self.setCentralWidget(self.relWin)
@@ -1000,6 +1019,7 @@ class RelationAddWindow(QtWidgets.QMainWindow):
         self.clas = clas
         self.notebook = notebook
         self.removeVar = removeVar
+        self.setWindowTitle("Relationships")
         
         self.relWin = Rela.AddWindow(notebook, clas)
         self.cw = self.setCentralWidget(self.relWin)
@@ -1211,6 +1231,24 @@ class DescWindow(QtWidgets.QMainWindow):
                 self.changeLargeImage(True)
             if not self.clas.isImageBig:
                 self.changeSmallImage(True)
+
+        self.show()
+
+class MoveWindow(QtWidgets.QMainWindow):
+
+    def changeText(text):
+        self.textEdit.setPlaintText(text)
+
+    def __init__(self):
+        super().__init__()
+
+        self.setGeometry(350,350, 500, 300) #Pos followed by minimum
+        self.setMaximumSize(1000,600)
+
+        self.textEdit = QtWidgets.QPlainTextEdit()
+        self.cw = self.setCentralWidget(self.textEdit)
+
+        self.textEdit.setReadOnly(True)
 
         self.show()
 
