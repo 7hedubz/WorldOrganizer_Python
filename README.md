@@ -1,7 +1,7 @@
 # WorldCreator
 Welcome to my first public project for Python. This work was spawned of a need for a particular type of world-building program and is intended to be used as a reference tool/creativity tool before, during and after games of D&D. While designed with D&D in mind I left it "fairly" open ended as to how you'd like to create your world. 
 
-This project utilizes PySide2 for it's GUI. The command line commandusing pip to install this package on Windows (The machine I use) is as follows.
+This project utilizes PySide2 for it's GUI. To utilize the command line with pip to install this package on Windows (The machine I use) is as follows.
 
 pip install PySide2
 
