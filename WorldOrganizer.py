@@ -12,7 +12,6 @@ VERSION_CONTROL = "World Creator Files (*.wc1)"
 # CountryTab & treeObject contains INFORMATION for use by the DescWindow class to create a window description.
 
 class AddCountry(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super().__init__()
 
@@ -28,7 +27,6 @@ class AddCountry(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 class AddFeature(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super().__init__()
 
@@ -48,19 +46,17 @@ class AddFeature(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 class CountryNotebook(QtWidgets.QWidget):
-
     def changeSwitching(self):
-        self.connectionSetup(True)
         self.doubleClickToMove = not self.doubleClickToMove
+        self.connectionSetup(True)
+        print("Changed switching from ",not self.doubleClickToMove," to ",self.doubleClickToMove)
 
     def moveTreeItem(self):
-        #currItem = self.tree.currentItem()
-        #print("test complete")
+        #fuck
         pass
     
     def moveCountry(self):
-        #currItem = self.tree.currentItem()
-        #print("test complete")
+        #fuck
         pass
 
     def selfDestruct(self):
@@ -136,17 +132,20 @@ class CountryNotebook(QtWidgets.QWidget):
         #Disconnects the double click for opening the descwindow (need to rename those functions later)
         oldSelection = self.currentTab
         self.currentTab = self.currCountrySelection()
+        print("Reconnecting...")
 
         if switching: #If we are switching I need to disconnect the previous double click connections. 
             if self.doubleClickToMove: #We were opening windows, now we are moving.
                 try:
                     oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
                     self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                    oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
                 except:
                     pass
                 try:
                     oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
                     self.notebook.tabBarDoubleClicked.connect(self.moveCountry)
+                    self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
                     return
                 except:
                     pass
@@ -154,11 +153,13 @@ class CountryNotebook(QtWidgets.QWidget):
                 try:
                     oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
                     self.notebook.tabBarDoubleClicked.disconnect(self.moveCountry)
+                    oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
                 except:
                     pass
                 try:
                     oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
                     self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+                    self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
                     return
                 except:
                     pass
@@ -189,7 +190,6 @@ class CountryNotebook(QtWidgets.QWidget):
     def changeCountrySelection(self):
         self.choicesReset()
         self.connectionSetup(False)
-        print("Called connectionSetup Func with False")
 
     def updatePos(self):
         currCountry = self.currCountrySelection()
@@ -231,8 +231,6 @@ class CountryNotebook(QtWidgets.QWidget):
                 break
             else:
                 endResult.append(loopItem.parent().indexOfChild(loopItem))
-                #print("Current loopItem " + loopItem.uName)
-                #print("New loopItem " + loopItem.parent().uName)
                 loopItem = loopItem.parent()
         print(endResult)
         return endResult
@@ -497,7 +495,6 @@ class CountryTab(QtWidgets.QWidget):
 class treeObject(QtWidgets.QTreeWidgetItem):
 
     def downcrement(self, index):
-        print("Downing ",self.uName)
         for ea in self.children:
             ea.downcrement(index)
         self.pos[index] -= 1
@@ -707,21 +704,17 @@ class MyWidget(QtWidgets.QWidget):
         return ret
 
     def parentSaveFunc(self, filePath = "", dialog = True):
-        #print("Trying to save")
         countries = self.notebook.countries
         
         if len(countries) == 0:
-            #print("Nothing to save!")
             return
 # We will be parsing through each country to find landscapes.
         self.parentSaveInfo = {}
         for eaCou in countries:
-            #print("saving "+eaCou.uName)
             self.parentSaveInfo[eaCou.uName] = []
             self.parentSaveInfo[eaCou.uName].append(self.saveCountry(eaCou))
 
     # And now each landscape to find towns/notable places
-            #print("Saving Landscapes")
             for eaLand in eaCou.children:
                 if isinstance(eaLand, type(Landscape(""))):
                     self.parentSaveInfo[eaCou.uName].append(self.saveLandscape(eaLand))
@@ -1088,7 +1081,6 @@ class DescWindow(QtWidgets.QMainWindow):
         if text.replace(" ", "") == "":
             return
         if self.clas.type == "c":
-            #print("It's a Country!")
             if self.isUniq(text, self.country.cNB.countries):
                 self.country.cNB.notebook.setTabText(self.CI, text)
                 self.setWindowTitle("Country - "+self.clas.uName)
