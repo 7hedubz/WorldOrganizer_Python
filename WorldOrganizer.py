@@ -33,7 +33,6 @@ class AddFeature(QtWidgets.QWidget):
         self.featureChoices = QtWidgets.QComboBox()
         self.featureNameField = QtWidgets.QLineEdit()
         self.featureCreateButton = QtWidgets.QPushButton("Create Feature")
-
         self.featureChoices.addItem("Landscape", "ls")
 
         self.layout = QtWidgets.QHBoxLayout()
@@ -42,22 +41,60 @@ class AddFeature(QtWidgets.QWidget):
         self.layout.addWidget(QtWidgets.QLabel("Feature Name"))
         self.layout.addWidget(self.featureNameField)
         self.layout.addWidget(self.featureCreateButton)
-        self.layout.addSpacing(200)
         self.setLayout(self.layout)
 
 class CountryNotebook(QtWidgets.QWidget):
     def changeSwitching(self):
         self.doubleClickToMove = not self.doubleClickToMove
+        if self.doubleClickToMove:
+            self.moveDescLabel.setText("We Are : MOVING      ")
+        else:
+            self.moveDescLabel.setText("We Are : OPENING DESC")
         self.connectionSetup(True)
-        print("Changed switching from ",not self.doubleClickToMove," to ",self.doubleClickToMove)
 
     def moveTreeItem(self):
-        #fuck
-        pass
-    
+        #"We Are : OPENING"
+        #"We Are : MOVING"
+        print("Wants to move tree item...")
+
+        currCountry = self.currCountrySelection()
+        currCountryIndex = self.countries.index(currCountry)
+        currItem = currCountry.tree.currentItem()
+
+        print("Checking to see if we've already clicked one...")
+        if self.moveVar1:
+            print("We have already chosen one! Checking to see if it's us...")
+            if self.moveVar1.pos == currItem.pos:
+                print("It's us! Let's cancel out.")
+                self.moveVar1 = 0
+                self.moveVar2 = 0
+                self.moveDescLabel.setText("We Are MOVING : ")
+                return
+            if self.moveVar2:
+                print("We have already chose two! Checking to see if it's us. (We have to be a landscape to move from country to country!")
+                if (self.moveVar2.pos == currItem.pos and self.moveVar2.type == "ls"):
+                    print("It's us! Let's try to move! First we need to figure out what one is, so we know how we are moving.")
+                    if self.moveVar1.type == "c":
+                        print("It's a country, let's change our pos, and our childrens pos's, to our new home.")
+                        for ea in currItem.children:
+                            ea.changePos(0, currCountryIndex)
+                        currItem.pos[0] = currCountryIndex
+                        self.reload()
+            if not self.moveVar2:
+                self.moveDescLabel.setText("We Are MOVING : "+self.moveVar1.uName+" WITH "+self.moveVar2.uName)
+                #Here we go to move them.
+        if not self.moveVar1:
+            self.moveVar1 = currItem
+            self.moveDescLabel.setText("We Are MOVING : "+currItem.uName+" WITH")
+
     def moveCountry(self):
-        #fuck
-        pass
+        #"We Are : OPENING"
+        #"We Are : MOVING"
+        print("Wants to move country...")
+        currCountry = self.currCountrySelection()
+        currCountryIndex = self.countries.index(currCountry)
+
+        currItem = currCountry.tree.currentItem()
 
     def selfDestruct(self):
         for ea in self.countries:
@@ -151,14 +188,14 @@ class CountryNotebook(QtWidgets.QWidget):
                     pass
             if not self.doubleClickToMove: #We were moving, now we are opening windows. 
                 try:
-                    oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
                     self.notebook.tabBarDoubleClicked.disconnect(self.moveCountry)
+                    oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
                     oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
                 except:
                     pass
                 try:
-                    oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
                     self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+                    oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
                     self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
                     return
                 except:
@@ -201,10 +238,8 @@ class CountryNotebook(QtWidgets.QWidget):
         for ea in self.countries:
             for each in ea.ALLchildren:
                 expanderHelper.append(each.isExpanded())
-        
-        
-        myWindow.myWidgetVar.parentSaveFunc(filePath = 'reload.json', dialog = False)
-        myWindow.myWidgetVar.parentLoadFunc(filePath = 'reload.json', dialog = False)
+
+        self.reload()
         
         self.notebook.setCurrentIndex(currCountryI)
         i = -1
@@ -212,7 +247,11 @@ class CountryNotebook(QtWidgets.QWidget):
             for each in ea.ALLchildren:
                 i += 1
                 each.setExpanded(expanderHelper[i])
-                
+           
+    def reload(self):
+        myWindow.myWidgetVar.parentSaveFunc(filePath = 'reload.json', dialog = False)
+        myWindow.myWidgetVar.parentLoadFunc(filePath = 'reload.json', dialog = False)
+
     def getPos(self, item):
         currCountry = self.currCountrySelection()
         if (currCountry is None):
@@ -448,12 +487,16 @@ class CountryNotebook(QtWidgets.QWidget):
         self.notebook = QtWidgets.QTabWidget()
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
+        self.moveDescLabel = QtWidgets.QLabel("We Are OPENING : ")
+        self.moveVar1 = 0
+        self.moveVar2 = 0
 
 
         self.layout = QtWidgets.QVBoxLayout()
 
         self.layout.addWidget(self.countryCreateGroup)
         self.layout.addWidget(self.featureCreateGroup)
+        self.layout.addWidget(self.moveDescLabel)
         self.layout.addWidget(self.notebook)
 
         self.setLayout(self.layout)
@@ -498,6 +541,11 @@ class treeObject(QtWidgets.QTreeWidgetItem):
         for ea in self.children:
             ea.downcrement(index)
         self.pos[index] -= 1
+
+    def changePos(self, index, num):
+        for ea in self.children:
+            ea.changePos(num)
+        self.pos[index] = num
 
     def parentDownPosUpdate(self, index, country = None):
     
