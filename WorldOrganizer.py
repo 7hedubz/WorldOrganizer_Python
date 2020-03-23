@@ -61,30 +61,34 @@ class CountryNotebook(QtWidgets.QWidget):
         currCountryIndex = self.countries.index(currCountry)
         currItem = currCountry.tree.currentItem()
 
-        print("Checking to see if we've already clicked one...")
-        if self.moveVar1:
-            print("We have already chosen one! Checking to see if it's us...")
-            if self.moveVar1.pos == currItem.pos:
-                print("It's us! Let's cancel out.")
-                self.moveVar1 = 0
-                self.moveVar2 = 0
+        if self.itemToMove: #Check to see if one already selected
+            if self.itemToMove.pos == currItem.pos: #is it us?
+                self.itemToMove = 0 #They selected the move var again, so cancel out.
+                self.itemToRx = 0
                 self.moveDescLabel.setText("We Are MOVING : ")
                 return
-            if self.moveVar2:
-                print("We have already chose two! Checking to see if it's us. (We have to be a landscape to move from country to country!")
-                if (self.moveVar2.pos == currItem.pos and self.moveVar2.type == "ls"):
-                    print("It's us! Let's try to move! First we need to figure out what one is, so we know how we are moving.")
-                    if self.moveVar1.type == "c":
-                        print("It's a country, let's change our pos, and our childrens pos's, to our new home.")
-                        for ea in currItem.children:
-                            ea.changePos(0, currCountryIndex)
-                        currItem.pos[0] = currCountryIndex
-                        self.reload()
-            if not self.moveVar2:
-                self.moveDescLabel.setText("We Are MOVING : "+self.moveVar1.uName+" WITH "+self.moveVar2.uName)
+            
+            if self.itemToRx: #If we already have a first item, and it isn't us. Then do we have a Rxer?
+                if self.itemToRx.pos == currItem.pos: #If it was us (So they are confirming)
+                    for ea in self.itemToRx.possibleChildren: #Checking to make sure the Rxer can rx the Mover.
+                        if ea[1] == itemToMove.type: #If this ever rings positive, then the Rxer CAN hold the Mover. So lets Move it into the Rxer!
+                            
+                            
+                            for ea in itemToMove.children:
+                                ea.changePos(0, currCountryIndex)
+                            currItem.pos[0] = currCountryIndex
+                            self.reload()
+
+
+            if not self.itemToRx:
+                self.moveDescLabel.setText("We Are MOVING : "+self.itemToMove.uName+" WITH "+self.itemToRx.uName)
                 #Here we go to move them.
-        if not self.moveVar1:
-            self.moveVar1 = currItem
+
+
+
+
+        if not self.itemToMove:
+            self.itemToMove = currItem
             self.moveDescLabel.setText("We Are MOVING : "+currItem.uName+" WITH")
 
     def moveCountry(self):
@@ -169,20 +173,20 @@ class CountryNotebook(QtWidgets.QWidget):
         #Disconnects the double click for opening the descwindow (need to rename those functions later)
         oldSelection = self.currentTab
         self.currentTab = self.currCountrySelection()
-        print("Reconnecting...")
 
         if switching: #If we are switching I need to disconnect the previous double click connections. 
             if self.doubleClickToMove: #We were opening windows, now we are moving.
                 try:
-                    oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
                     self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                    oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
                     oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
                 except:
                     pass
                 try:
-                    oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
                     self.notebook.tabBarDoubleClicked.connect(self.moveCountry)
+                    oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
                     self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
+                    
                     return
                 except:
                     pass
@@ -194,33 +198,40 @@ class CountryNotebook(QtWidgets.QWidget):
                 except:
                     pass
                 try:
+                    print("test")
                     self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
                     oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
                     self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
+                    print("test")
                     return
                 except:
                     pass
       
         if self.doubleClickToMove: #We are moving
             try:
-                oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
                 self.notebook.tabBarDoubleClicked.disconnect(self.moveCountry)
+                oldSelection.tree.itemDoubleClicked.disconnect(self.moveTreeItem)
+                oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
             except:
                 pass
             try:
-                oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
                 self.notebook.tabBarDoubleClicked.connect(self.moveCountry)
+                oldSelection.tree.itemDoubleClicked.connect(self.moveTreeItem)
+                self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
             except:
                 pass
+
         elif not self.doubleClickToMove: #We are opening desc windows
             try:
-                self.currentTab.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
                 self.notebook.tabBarDoubleClicked.disconnect(self.tabBarDblClk)
+                oldSelection.tree.itemDoubleClicked.disconnect(self.treeItemDblClk)
+                oldSelection.tree.itemSelectionChanged.disconnect(self.treeSelectionChanged)
             except:
                 pass
             try:
-                self.currentTab.tree.itemDoubleClicked.connect(self.treeItemDblClk)
                 self.notebook.tabBarDoubleClicked.connect(self.tabBarDblClk)
+                oldSelection.tree.itemDoubleClicked.connect(self.treeItemDblClk)
+                self.currentTab.tree.itemSelectionChanged.connect(self.treeSelectionChanged)
             except:
                 pass
     
@@ -438,6 +449,7 @@ class CountryNotebook(QtWidgets.QWidget):
         a.saveRels = relations
         a.imagePath = imageData[0]
         a.isImageBig = imageData[1]
+        self.connectionSetup(False)
         return a
 
     def createTab(self):
@@ -488,8 +500,8 @@ class CountryNotebook(QtWidgets.QWidget):
         self.countryCreateGroup = AddCountry()
         self.featureCreateGroup = AddFeature()
         self.moveDescLabel = QtWidgets.QLabel("We Are OPENING : ")
-        self.moveVar1 = 0
-        self.moveVar2 = 0
+        self.itemToMove = 0
+        self.itemToRx = 0
 
 
         self.layout = QtWidgets.QVBoxLayout()
@@ -526,6 +538,7 @@ class CountryTab(QtWidgets.QWidget):
         self.pos = []
         self.imagePath = ""
         self.isImageBig = False
+        self.possibleChildren = ["Landscape", "ls"]
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
