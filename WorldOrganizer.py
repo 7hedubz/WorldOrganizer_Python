@@ -52,10 +52,14 @@ class CountryNotebook(QtWidgets.QWidget):
             self.moveDescLabel.setText("We Are : OPENING DESC")
         self.connectionSetup(True)
 
+    def resetMoveVars(self):
+        self.itemToMove = 0
+        self.itemToRx = 0
+        self.moveDescLabel.setText("We Are MOVING : ")
+
     def moveTreeItem(self):
         #"We Are : OPENING"
         #"We Are : MOVING"
-        print("Wants to move tree item...")
 
         currCountry = self.currCountrySelection()
         currCountryIndex = self.countries.index(currCountry)
@@ -63,42 +67,63 @@ class CountryNotebook(QtWidgets.QWidget):
 
         if self.itemToMove: #Check to see if one already selected
             if self.itemToMove.pos == currItem.pos: #is it us?
-                self.itemToMove = 0 #They selected the move var again, so cancel out.
-                self.itemToRx = 0
-                self.moveDescLabel.setText("We Are MOVING : ")
+                self.resetMoveVars() #They selected the move var again, so cancel out.
                 return
             
-            if self.itemToRx: #If we already have a first item, and it isn't us. Then do we have a Rxer?
-                if self.itemToRx.pos == currItem.pos: #If it was us (So they are confirming)
-                    for ea in self.itemToRx.possibleChildren: #Checking to make sure the Rxer can rx the Mover.
-                        if ea[1] == itemToMove.type: #If this ever rings positive, then the Rxer CAN hold the Mover. So lets Move it into the Rxer!
-                            
-                            
-                            for ea in itemToMove.children:
-                                ea.changePos(0, currCountryIndex)
-                            currItem.pos[0] = currCountryIndex
-                            self.reload()
+        if self.itemToRx: #If we already have a Mover item, and it isn't us. Then do we have a Rxer?
+            if self.itemToRx.pos == currItem.pos: #If it was us (So they are confirming)
+                #This is where we swap the two selected
+                if self.itemToRx.type == self.itemToMove.type: #If this is true, then we are swapping spots. Not moving into someone.
+                    print("We would do the swap here!")
+                    self.resetMoveVars()
+                    return
+                
+                try:
+                    for ea in self.itemToRx.parent().possibleChildren:
+                        if ea[1] == self.itemToMove.type:
+                            print("We would swap the mover and Rxer here")
+                            self.resetMoveVars()
+                            return
+                except:
+                    pass
 
-
-            if not self.itemToRx:
-                self.moveDescLabel.setText("We Are MOVING : "+self.itemToMove.uName+" WITH "+self.itemToRx.uName)
-                #Here we go to move them.
-
-
-
+                #This is where we move the mover into the rxer
+                for ea in self.itemToRx.possibleChildren: #Checking to make sure the Rxer can rx the Mover.
+                    if ea[1] == self.itemToMove.type: #If this ever rings positive, then the Rxer CAN hold the Mover. So lets Move it into the Rxer!
+                        print("we would do the move into Rxer here!")
+                        self.resetMoveVars()
+                        return
+                print("Cannot move",self.itemToMove,"into",self.itemToRx)
+                self.resetMoveVars()
+                return
 
         if not self.itemToMove:
             self.itemToMove = currItem
             self.moveDescLabel.setText("We Are MOVING : "+currItem.uName+" WITH")
+            return
+        
+        if not self.itemToRx:
+            self.itemToRx = currItem
+            self.moveDescLabel.setText("We Are MOVING : "+self.itemToMove.uName+" WITH "+self.itemToRx.uName)
+            return
 
     def moveCountry(self):
         #"We Are : OPENING"
         #"We Are : MOVING"
-        print("Wants to move country...")
         currCountry = self.currCountrySelection()
         currCountryIndex = self.countries.index(currCountry)
-
         currItem = currCountry.tree.currentItem()
+
+        
+        if not self.itemToMove:
+            self.itemToMove = currCountry
+            self.moveDescLabel.setText("We Are MOVING : "+currItem.uName+" WITH")
+            return
+        
+        elif not self.itemToRx:
+            self.itemToRx = currCountry
+            self.moveDescLabel.setText("We Are MOVING : "+self.itemToMove.uName+" WITH "+self.itemToRx.uName)
+            return
 
     def selfDestruct(self):
         for ea in self.countries:
@@ -262,6 +287,7 @@ class CountryNotebook(QtWidgets.QWidget):
     def reload(self):
         myWindow.myWidgetVar.parentSaveFunc(filePath = 'reload.json', dialog = False)
         myWindow.myWidgetVar.parentLoadFunc(filePath = 'reload.json', dialog = False)
+        self.resetMoveVars() 
 
     def getPos(self, item):
         currCountry = self.currCountrySelection()
