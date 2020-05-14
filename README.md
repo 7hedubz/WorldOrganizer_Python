@@ -36,3 +36,9 @@ Select the relationship from the list in the Show Relationships window and then 
 You can double click any relationship to open up the description-window for that feature/country as well (provided it's not already open)
 
 I think that's about it! If there is any confusion you can email me at Kychdo@gmail.com, you can also reach me there with any errors/bugs you find so I might try to fix them. I would appreciate as much information about the issue as possible, including a screenshot of the error code (if there was one)
+
+As of May in 2020 this project is no longer being added to or supported. 
+
+It will however in it's current form still function as intended for all '.wc1' files that you may have created for it. 
+
+I am however migrating it over to c# with multiple QoL improvements (found here https://github.com/7hedubz/WorldOrganizerCSharp )
