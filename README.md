@@ -10,15 +10,11 @@ pip install PySide2
 
 Troubleshooting can be found here - https://packaging.python.org/tutorials/installing-packages/
 
-While I'm fairly certain in it's current state it's workable.
-
-As for a few acknowledgements;
-My older brother ChaoticSeven who got me into DMing and when he heard about this tool he pushed me and pushed me into finishing it, or at least getting it to somewhere he could play around with it. 
-My good friend Hill, he likes hills. He likes climbing and then claiming hills as his own, and he hates radios. Regardless, I got him into D&D and now he can't get enough of it. He heard about this tool and unendingly gives me new features to add into it. He has no idea what goes into all of this, but his idea's are great nonetheless.
+I'm fairly certain in it's current state it's workable.
 
 Below is a quick tutorial to using the piece of software because as a self-learned programmer I obviously have some wack control schemes for this thing.
 
-When run a console should remain open in the background. This is for error reporting, you don't need to mind it at all unless something weird happens. If such a thing occurs, check for an error. Lack of an error showing doesn't mean that there isn't as mistake though, Python has a tendancy to skip over somethings and try to keep working anyway. 
+When run a console should remain open in the background. This is for error reporting, you don't need to mind it at all unless something weird happens. If such a thing occurs, check for an error. Lack of an error showing doesn't mean that there isn't as mistake though, Python has a tendancy to skip over somethings and try to keep working anyway I've found. 
 
 The first window that shows up is your main window. You'll need to create a country by typing a name and clicking the button. From there you can create a landscape. 
 
